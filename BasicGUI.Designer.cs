@@ -34,8 +34,6 @@
             this.getIOtimer = new System.Windows.Forms.Timer(this.components);
             this.InputBox1 = new System.Windows.Forms.TextBox();
             this.OutputBox1 = new System.Windows.Forms.NumericUpDown();
-            this.Get1 = new System.Windows.Forms.Button();
-            this.Get2 = new System.Windows.Forms.Button();
             this.InputBox2 = new System.Windows.Forms.TextBox();
             this.OutputBox2 = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
@@ -56,16 +54,13 @@
             this.state_label = new System.Windows.Forms.Label();
             this.force_left_sensor = new System.Windows.Forms.CheckBox();
             this.force_right_sensor = new System.Windows.Forms.CheckBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.sensor_readings_label = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.label9 = new System.Windows.Forms.Label();
             this.adj_rate_label = new System.Windows.Forms.Label();
             this.prev_adj_label = new System.Windows.Forms.Label();
             this.adj_dir_label = new System.Windows.Forms.Label();
-            this.deltaT_label = new System.Windows.Forms.Label();
             this.prev_adj_r_label = new System.Windows.Forms.Label();
-            this.last_adj_ms_label = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
@@ -120,31 +115,9 @@
             0});
             this.OutputBox1.ValueChanged += new System.EventHandler(this.OutputBox1_ValueChanged);
             // 
-            // Get1
-            // 
-            this.Get1.Location = new System.Drawing.Point(379, 36);
-            this.Get1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.Get1.Name = "Get1";
-            this.Get1.Size = new System.Drawing.Size(74, 23);
-            this.Get1.TabIndex = 4;
-            this.Get1.Text = "Input 1";
-            this.Get1.UseVisualStyleBackColor = true;
-            this.Get1.Click += new System.EventHandler(this.Get1_Click);
-            // 
-            // Get2
-            // 
-            this.Get2.Location = new System.Drawing.Point(379, 7);
-            this.Get2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.Get2.Name = "Get2";
-            this.Get2.Size = new System.Drawing.Size(74, 23);
-            this.Get2.TabIndex = 4;
-            this.Get2.Text = "Input 2";
-            this.Get2.UseVisualStyleBackColor = true;
-            this.Get2.Click += new System.EventHandler(this.Get2_Click);
-            // 
             // InputBox2
             // 
-            this.InputBox2.Location = new System.Drawing.Point(309, 10);
+            this.InputBox2.Location = new System.Drawing.Point(394, 36);
             this.InputBox2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.InputBox2.Name = "InputBox2";
             this.InputBox2.Size = new System.Drawing.Size(60, 20);
@@ -358,18 +331,6 @@
             this.force_right_sensor.Text = "R";
             this.force_right_sensor.UseVisualStyleBackColor = true;
             // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.checkBox1.Location = new System.Drawing.Point(96, 110);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(119, 17);
-            this.checkBox1.TabIndex = 21;
-            this.checkBox1.Text = "Manual Override";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
             // sensor_readings_label
             // 
             this.sensor_readings_label.AutoSize = true;
@@ -430,15 +391,6 @@
             this.adj_dir_label.TabIndex = 27;
             this.adj_dir_label.Text = "Adj Direction:";
             // 
-            // deltaT_label
-            // 
-            this.deltaT_label.AutoSize = true;
-            this.deltaT_label.Location = new System.Drawing.Point(251, 194);
-            this.deltaT_label.Name = "deltaT_label";
-            this.deltaT_label.Size = new System.Drawing.Size(40, 13);
-            this.deltaT_label.TabIndex = 29;
-            this.deltaT_label.Text = "deltaT:";
-            // 
             // prev_adj_r_label
             // 
             this.prev_adj_r_label.AutoSize = true;
@@ -447,15 +399,6 @@
             this.prev_adj_r_label.Size = new System.Drawing.Size(76, 13);
             this.prev_adj_r_label.TabIndex = 30;
             this.prev_adj_r_label.Text = "Prev Adj Rate:";
-            // 
-            // last_adj_ms_label
-            // 
-            this.last_adj_ms_label.AutoSize = true;
-            this.last_adj_ms_label.Location = new System.Drawing.Point(328, 194);
-            this.last_adj_ms_label.Name = "last_adj_ms_label";
-            this.last_adj_ms_label.Size = new System.Drawing.Size(64, 13);
-            this.last_adj_ms_label.TabIndex = 31;
-            this.last_adj_ms_label.Text = "Last Adj ms:";
             // 
             // label10
             // 
@@ -508,13 +451,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.ClientSize = new System.Drawing.Size(560, 437);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.numericUpDown3);
             this.Controls.Add(this.numericUpDown2);
-            this.Controls.Add(this.last_adj_ms_label);
             this.Controls.Add(this.prev_adj_r_label);
-            this.Controls.Add(this.deltaT_label);
             this.Controls.Add(this.adj_dir_label);
             this.Controls.Add(this.prev_adj_label);
             this.Controls.Add(this.adj_rate_label);
@@ -522,7 +464,6 @@
             this.Controls.Add(this.label9);
             this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.sensor_readings_label);
-            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.force_right_sensor);
             this.Controls.Add(this.force_left_sensor);
             this.Controls.Add(this.state_label);
@@ -539,17 +480,18 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.Get2);
-            this.Controls.Add(this.Get1);
             this.Controls.Add(this.OutputBox2);
             this.Controls.Add(this.OutputBox1);
             this.Controls.Add(this.InputBox2);
             this.Controls.Add(this.InputBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.ImeMode = System.Windows.Forms.ImeMode.On;
+            this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.Name = "Form1";
             this.Text = "Bambi GUI 1.0";
+            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.outByte1)).EndInit();
@@ -570,8 +512,6 @@
         private System.Windows.Forms.TextBox InputBox1;
         private System.Windows.Forms.NumericUpDown OutputBox1;
         private System.IO.Ports.SerialPort serial;
-        private System.Windows.Forms.Button Get1;
-        private System.Windows.Forms.Button Get2;
         private System.Windows.Forms.TextBox InputBox2;
         private System.Windows.Forms.NumericUpDown OutputBox2;
         private System.Windows.Forms.Label label1;
@@ -592,16 +532,13 @@
         private System.Windows.Forms.Label state_label;
         private System.Windows.Forms.CheckBox force_left_sensor;
         private System.Windows.Forms.CheckBox force_right_sensor;
-        private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Label sensor_readings_label;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label adj_rate_label;
         private System.Windows.Forms.Label prev_adj_label;
         private System.Windows.Forms.Label adj_dir_label;
-        private System.Windows.Forms.Label deltaT_label;
         private System.Windows.Forms.Label prev_adj_r_label;
-        private System.Windows.Forms.Label last_adj_ms_label;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.NumericUpDown numericUpDown2;
         private System.Windows.Forms.NumericUpDown numericUpDown3;

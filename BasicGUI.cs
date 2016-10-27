@@ -3,25 +3,18 @@
 // Bluetooth I/O Card - Sample GUI Code
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
+
 
 using static BluetoothGUISample.Params;
 namespace BluetoothGUISample
 {
-    
+
     public partial class Form1 : Form
     {
         // Declare variables to store inputs and outputs.
         bool open_serial_connection = true;
-        bool byteRead = false;
 
         int Input1 = 0;
         int Input2 = 0;
@@ -33,67 +26,34 @@ namespace BluetoothGUISample
         const byte ZERO = 0;
 
         // used to add items to the dropdown menu
-        private String[] operating_modes = { "Clockwise", "Counterclockwise", "Reverse Circle", "Squiggle", "Manual", "Stop" };
-
-        // used to tell if the vehicle should be moving or stopped
-        private bool is_running = false;
-        private bool is_manual = false;
-
-        // stores operation mode from dropdown menu
-        private int operation_mode = 4; // manual mode by default
-
-        // date time
-        float start_time;
-        
+        private String[] operating_modes = { "Stop", "Manual", "Clockwise", "Counterclockwise", "Reverse Circle", "Squiggle"};
 
         // Motor max speeds
-        private double L_MAX = 0.8; // 80% 
-        private double R_MAX = 0.8; // 80%
+        private double L_MAX = 1; // 100% 
+        private double R_MAX = 1; // 100%
 
-        // StopWatch 
-        private Stopwatch stopwatch;
+        int operation_mode = 0;
 
 
-        private enum OpStates // finite state machine states
-        {
-            START,
-            STRAIGHT,
-            SEARCH_N_DESTROY,
-            LEFT,
-            SHARP_LEFT,
-            RIGHT,
-            SHARP_RIGHT
-        }
-
-        // 
-        OpStates state;
-        OpStates prev_state;
         public Form1()
         {
             // Initialize required for form controls.
             InitializeComponent();
 
-            // initialise finite state machine
-            state = OpStates.START;
-            prev_state = state;
-            // initialise stopwatch
-            stopwatch = new Stopwatch();
-            stopwatch.Reset();
-            stopwatch.Start();
-            start_time = stopwatch.ElapsedMilliseconds;
+
+
 
             numericUpDown1.Value = (decimal)K_T;
             numericUpDown2.Value = (decimal)I_T;
             numericUpDown3.Value = (decimal)D_T;
 
-            is_running = false;
-
             foreach (String mode in operating_modes) // add the items to the dropdown menu
             {
                 modeSelect_Box.Items.Add(mode);
             }
-            
-            
+            this.modeSelect_Box.SelectedIndex = operation_mode;
+
+
             // Establish connection on the Virtual Serial Port
             if (open_serial_connection == true)
             {
@@ -126,16 +86,6 @@ namespace BluetoothGUISample
             {
                 serial.Write(Outputs, 0, 4);         //Send all four bytes to the IO card.                      
             }
-        }
-
-        private void Get1_Click(object sender, EventArgs e) //Press the button to request value from Input 1, Arduino Port F.
-        {
-            sendIO(0, ZERO);  // The value 0 indicates Input 1, ZERO just maintains a fixed value for the discarded data in order to maintain a consistent package format.
-        }
-
-        private void Get2_Click(object sender, EventArgs e) //Press the button to request value from Input 1, Arduino Port K.
-        {
-            sendIO(1, ZERO);  // The value 1 indicates Input 2, ZERO maintains a consistent value for the message output.
         }
 
         private void getIOtimer_Tick(object sender, EventArgs e) //It is best to continuously check for incoming data as handling the buffer or waiting for event is not practical in C#.
@@ -189,9 +139,6 @@ namespace BluetoothGUISample
         int right_motor = 127;
 
 
-        // time since last adjustment
-        private double deltaT_adjustment = 0.1; // ms
-        private double last_adjustment_ms = 0;
         // rate of last correction
         private double adjustment_rate = 0; // 
         private double previous_adjustment_rate = 0; // 
@@ -214,96 +161,45 @@ namespace BluetoothGUISample
             int left_sensor = ((1 << SENSOR1_POS) & Input1);
             int right_sensor = ((1 << SENSOR2_POS) & Input1);
 
-            
 
- 
-
-            if (is_running)
+            switch (operation_mode)
             {
-                if (is_manual)
-                {
-                    bool l = force_left_sensor.Checked;
-                    bool r = force_right_sensor.Checked;
+                case 0: // Clockwise: Right sensor on the inside of track: right sensor stays on line
+                    // left motor speed slightly higher than right motor speed to force it to slowly
+                    // turn clockwise towards the right
+                    L_MAX = 0.9;
+                    R_MAX = 0.85;
 
-                    if (l) 
-                        left_sensor = 1;
-                    else 
-                        left_sensor = 0;
-                    if (r) 
-                        right_sensor = 1;
-                    else 
-                        right_sensor = 0;
-                }
-
-                sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
-
-                /**
-                 * Tracking works like this.
-                 * Control algorithm aims to keep the inside sensor on top of the line.
-                 * When deviated: Based on the other sensor's reading it can
-                 * be determined in what direction the robot is going and how
-                 * its direction needs to be adjusted.
-                 * */
-
-
-                int l_1 = left_sensor;
-                int r_1 = right_sensor;
-
-
-                // set error to be current position - half of max position.
-                // is either 1, 0, or -1;
-                error = (l_1 + r_1) - 1;
-                total_error += error;
-
-                // unused currently
-                // may be of use later
-                // to be determined
-                if (left_sensor == 1) left_sensor = LINE;
-                if (right_sensor == 1) right_sensor = LINE;
-                if (left_sensor == 0) left_sensor = NO_LINE;
-                if (right_sensor == 0) right_sensor = NO_LINE;
+                    adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                    left_motor = (int)(L_MAX * 255 - adjustment_rate);
+                    if (left_motor < 127) left_motor = 127;
+                    right_motor = (int)(R_MAX * 255 + adjustment_rate);
+                    if (right_motor < 127) right_motor = 127;
+                    break;
+                case 1: // CCW: Left sensor on the inside of track, keep line under that
 
 
 
-                switch (operation_mode)
-                {
-                    case 0: // Clockwise: Right sensor on the inside of track: right sensor stays on line
-                        // left motor speed slightly higher than right motor speed to force it to slowly
-                        // turn clockwise towards the right
-                        L_MAX = 0.9;
-                        R_MAX = 0.85;
+                    break;
+                case 2: // Reverse CIRCLE
+                    // swap left and right
+                    // swap PWM
+                    // instead of outputting MAX*PWM output (1-MAX)*PWM
 
-                        adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                        left_motor = (int)(L_MAX * 255 - adjustment_rate);
-                        if (left_motor < 127) left_motor = 127;
-                        right_motor = (int)(R_MAX * 255 + adjustment_rate);
-                        if (right_motor < 127) right_motor = 127;
-                        break;
-                    case 1: // CCW: Left sensor on the inside of track, keep line under that
+                    break;
+                case 3: // Squiggle
+                    break;
+                case 5: // manual
+                    left_motor = (byte)outByte1.Value;
+                    right_motor = (byte)outByte2.Value;
+                    break;
+                default:
+                    Console.WriteLine(String.Format("Error. Operation mode invalid: {0}\n", operation_mode));
+                    break;
+            }
 
-
-
-                        break;
-                    case 2: // Reverse CIRCLE
-                        // swap left and right
-                        // swap PWM
-                        // instead of outputting MAX*PWM output (1-MAX)*PWM
-
-                        break;
-                    case 3: // Squiggle
-                        break;
-                    case 4: // manual
-                        left_motor = (byte)outByte1.Value;
-                        right_motor = (byte)outByte2.Value;
-                        break;
-                    default:
-                        Console.WriteLine(String.Format("Error. Operation mode invalid: {0}\n", operation_mode));
-                        break;
-                }
 
                 // GUI Update
-                deltaT_label.Text = "deltaT:" + deltaT_adjustment.ToString();
-                last_adj_ms_label.Text = "Last Adjustment ms: + " + last_adjustment_ms.ToString();
                 adj_dir_label.Text = "Total Error: " + total_error.ToString();
                 adj_rate_label.Text = "Adj rate: " + adjustment_rate.ToString();
                 prev_adj_label.Text = "Error: " + error.ToString();
@@ -311,11 +207,6 @@ namespace BluetoothGUISample
 
                 // line tracking
 
-
-                // store the time since a line was last found. 0 to 15 if it was previously read 
-                // accuracy limited by DateTime to 15 
-                // if (left_sensor == -1) deltaT_left = DateTime.Now.Millisecond - 
-                // if (right_sensor == -1) deltaT_right = DateTime.Now.Millisecond - deltaT_right;
 
                 // ensure proper byte range
 
@@ -329,21 +220,57 @@ namespace BluetoothGUISample
                 outByte1.Value = left_motor;
                 outByte2.Value = right_motor;
 
-                
-
-            }
-            else
+            switch (operation_mode)
             {
-                left_motor = 127;
-                right_motor = 127;
+                case 0:
+                    running_label.Text = "Stopped";
+                    running_label.ForeColor = Color.Red;
+                    outByte1.Enabled = false;
+                    outByte2.Enabled = false;
+                    OutputBox1.Enabled = false;
+                    OutputBox2.Enabled = false;
+                    break;
+                case 1:
+                    running_label.Text = "Manual";
+                    running_label.ForeColor = Color.Orange;
+                    outByte1.Enabled = true;
+                    outByte2.Enabled = true;
+                    OutputBox1.Enabled = true;
+                    OutputBox2.Enabled = true;
+                    break;
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    running_label.Text = "Running";
+                    running_label.ForeColor = Color.Green;
+                    outByte1.Enabled = false;
+                    outByte2.Enabled = false;
+                    OutputBox1.Enabled = false;
+                    OutputBox2.Enabled = false;
+                    break;
+                default: // 
+                    running_label.Text = "10 points to Gryffindor";
+                    break;
             }
-            sendIO(2, (byte)left_motor);
-            sendIO(3, (byte)right_motor);
-            // read sensors
-            sendIO(0, ZERO);  // The value 0 indicates Input 1, ZERO just maintains a fixed value for the discarded data in order to maintain a consistent package format
+            modeSelect_Box.SelectedIndex = operation_mode;
 
         }
-        
+        void Form1_KeyDown(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar >= 48 && e.KeyChar <= 53)
+            {
+                operation_mode = (int)e.KeyChar - 48;
+            }
+            else if (e.KeyChar == (char)Keys.Space)
+                operation_mode = 0;
+
+            if (Control.ModifierKeys == Keys.Up && operation_mode < 5)
+                operation_mode++;
+            else if (Control.ModifierKeys == Keys.Down && operation_mode > 0)
+                operation_mode--;
+
+        }
 
         // Method controlling PWM1 scrollbar value
         private void OutputBox1_ValueChanged(object sender, EventArgs e)
@@ -402,99 +329,38 @@ namespace BluetoothGUISample
                 OutputBox2.Value = (decimal)(a);
 
         }
+
         // handle input - dropdown box
         private void modeSelect_Box_SelectedIndexChanged(object sender, EventArgs e)
         {
-            int index = modeSelect_Box.SelectedIndex; // get index of currently selected item
-            operation_mode = index;
+            operation_mode = modeSelect_Box.SelectedIndex; // get index of currently selected item
 
-            switch (index)
-            {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                    is_running = true;
-                    running_label.Text = "Running";
-                    running_label.ForeColor = Color.Green;
-                    break;
-                case 4:
-                    is_running = true;
-                    running_label.Text = "Manual Ctrl";
-                    running_label.ForeColor = Color.Orange;
-                    is_manual = true;
-                    break;
-                default: // 
-                    is_running = false;
-                    running_label.Text = "Stopped";
-                    running_label.ForeColor = Color.Red;
-                    break;
-            }
-
-
-
-            //String selected = modeSelect_Box.SelectedItem.ToString();
-            
-            //// Clockwise, CCW, Reverse, Squiggle
-            //if (selected == operating_modes[0]) // clockwise operating mode
-            //{
-                
-            //} else if (selected == operating_modes[1]) // counter clockwise operating mode
-            //{
-
-            //} else if (selected == operating_modes[2]) // reverse operating mode
-            //{
-
-            //} else if (selected == operating_modes[3]) // squiggle mode
-            //{
-
-            //}
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBox1.Checked)
-            {
-                force_left_sensor.Enabled = true;
-                force_right_sensor.Enabled = true;
-                outByte1.Enabled = true;
-                outByte2.Enabled = true;
-                OutputBox1.Enabled = true;
-                OutputBox2.Enabled = true;
-
-                numericUpDown1.Enabled = true;
-                numericUpDown2.Enabled = true;
-                numericUpDown3.Enabled = true;
-                is_manual = true;
-            }
-            else
-            {
-                force_left_sensor.Enabled = false;
-                force_right_sensor.Enabled = false;
-                outByte1.Enabled = false;
-                outByte2.Enabled = false;
-                OutputBox1.Enabled = false;
-                OutputBox2.Enabled = false;
-                numericUpDown1.Enabled = false;
-                numericUpDown2.Enabled = false;
-                numericUpDown3.Enabled = false;
-                is_manual = false;
-            }
-        }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
             K_T = (double)numericUpDown1.Value;
         }
 
-        private long millis()
-        {
-            return stopwatch.ElapsedMilliseconds;
-        }
-
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
         {
             I_T = (double)numericUpDown2.Value;
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 
