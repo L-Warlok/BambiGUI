@@ -225,10 +225,14 @@ namespace BluetoothGUISample
                     bool l = force_left_sensor.Checked;
                     bool r = force_right_sensor.Checked;
 
-                    if (l) left_sensor = 1;
-                    else left_sensor = 0;
-                    if (r) right_sensor = 1;
-                    else right_sensor = 0;
+                    if (l) 
+                        left_sensor = 1;
+                    else 
+                        left_sensor = 0;
+                    if (r) 
+                        right_sensor = 1;
+                    else 
+                        right_sensor = 0;
                 }
 
                 sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
