@@ -13,12 +13,32 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-using static BluetoothGUISample.Params;
 namespace BluetoothGUISample
 {
     
     public partial class Form1 : Form
     {
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+         // sensor position on the board
+        public const byte SENSOR1_POS = 0;  // position of sensor 1 within the INPUT BYTE
+        public const byte SENSOR2_POS = 1;  // position of sensor 2 within the INPUT BYTE
+
+        public const int LEFT = -1;
+        public const int RIGHT = 1;
+
+        public const int LINE = -1;
+        public const int NO_LINE = 1;
+
+        // duty_cycle_out = (b_in - K1) / K2; - bit to duty cycle
+        // byte_out =  K2 * d_in + K1; - duty cycle to bit
+        public const double K1 = 1.7179, K2 = 2.3623; //       
+
+        public const double DAC_MIN = 0;
+        public const double DAC1_MAX = 8.0; // DAC 1 max voltage
+        public const double DAC2_MAX = 8.0; // dac 2 max voltage
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         // Declare variables to store inputs and outputs.
         bool open_serial_connection = true;
         bool byteRead = false;
@@ -199,9 +219,9 @@ namespace BluetoothGUISample
         private int adjustment_direction = LEFT; // adjustment direction
         private int previous_adjustment_direction = LEFT;
         // adjustment rate constant 
-        private double K_T = 0.25;
-        private double I_T = 1;
-        private double D_T = 6;
+        private double K_T = 0.6;
+        private double I_T = 0;
+        private double D_T = 50;
         // error
         private int error = 1; // MAX error is 2
         private int prev_error = 0;
@@ -210,32 +230,38 @@ namespace BluetoothGUISample
         private void sendLoopTimer_Tick(object sender, EventArgs e)
         {
             // bit mask the Input byte. bit 0 is left sensor. bit 1 is right sensor.
+            sendIO(1, ZERO);  // The value 1 indicates Input 2, ZERO maintains a consistent value for the message output.
 
-            int left_sensor = ((1 << SENSOR1_POS) & Input1);
-            int right_sensor = ((1 << SENSOR2_POS) & Input1);
+            int left_sensor = ((1 << SENSOR1_POS) & Input2);
+            int right_sensor = ((1 << SENSOR2_POS) & Input2) >> SENSOR2_POS;
 
-            
 
- 
+            sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
+            // sensor_readings_label.Text = String.Format("1: {0} 2: {1}", Input1, Input2);
 
             if (is_running)
             {
+
+                int l_1 = left_sensor ^ 1;
+                int r_1 = right_sensor ^ 1;
+
                 if (is_manual)
                 {
                     bool l = force_left_sensor.Checked;
                     bool r = force_right_sensor.Checked;
 
-                    if (l) 
-                        left_sensor = 1;
-                    else 
-                        left_sensor = 0;
-                    if (r) 
-                        right_sensor = 1;
-                    else 
-                        right_sensor = 0;
+                    if (l) left_sensor = 1;
+                    else left_sensor = 0;
+                    if (r) right_sensor = 1;
+                    else right_sensor = 0;
                 }
-
+                else
+                {
+                    error = (l_1 + r_1) - 1;
+                    total_error += error;
+                }
                 sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
+                // sensor_readings_label.Text = String.Format("1: {0} 2: {1}", Input1, Input2);
 
                 /**
                  * Tracking works like this.
@@ -246,38 +272,46 @@ namespace BluetoothGUISample
                  * */
 
 
-                int l_1 = left_sensor;
-                int r_1 = right_sensor;
 
 
                 // set error to be current position - half of max position.
                 // is either 1, 0, or -1;
-                error = (l_1 + r_1) - 1;
-                total_error += error;
+
 
                 // unused currently
                 // may be of use later
                 // to be determined
-                if (left_sensor == 1) left_sensor = LINE;
-                if (right_sensor == 1) right_sensor = LINE;
-                if (left_sensor == 0) left_sensor = NO_LINE;
-                if (right_sensor == 0) right_sensor = NO_LINE;
-
-
+                //if (left_sensor == 1) left_sensor = LINE;
+                //if (right_sensor == 1) right_sensor = LINE;
+                //if (left_sensor == 0) left_sensor = NO_LINE;
+                //if (right_sensor == 0) right_sensor = NO_LINE;
 
                 switch (operation_mode)
                 {
                     case 0: // Clockwise: Right sensor on the inside of track: right sensor stays on line
                         // left motor speed slightly higher than right motor speed to force it to slowly
                         // turn clockwise towards the right
-                        L_MAX = 0.9;
-                        R_MAX = 0.85;
+                        L_MAX = 1;
+                        R_MAX = 1;
+                        int minl, minr;
+                        if (l_1 == 1 && r_1 == 1)
+                        {
+                            adjustment_rate = 255;
+                            minl = 20;
+                            minr = 20;
+                        }
+                        else
+                        {
+                            adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                            minl = 127;
+                            minr = 127;
+                        }
 
-                        adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
                         left_motor = (int)(L_MAX * 255 - adjustment_rate);
-                        if (left_motor < 127) left_motor = 127;
+                        
+                        if (left_motor < minl) left_motor = minl;
                         right_motor = (int)(R_MAX * 255 + adjustment_rate);
-                        if (right_motor < 127) right_motor = 127;
+                        if (right_motor < minr) right_motor = minl;
                         break;
                     case 1: // CCW: Left sensor on the inside of track, keep line under that
 
@@ -295,6 +329,11 @@ namespace BluetoothGUISample
                     case 4: // manual
                         left_motor = (byte)outByte1.Value;
                         right_motor = (byte)outByte2.Value;
+                        break;
+                    case 5:
+                        left_motor = 127;
+                        right_motor = 127;
+
                         break;
                     default:
                         Console.WriteLine(String.Format("Error. Operation mode invalid: {0}\n", operation_mode));
@@ -326,6 +365,7 @@ namespace BluetoothGUISample
                 if (left_motor < 0) left_motor = 0;
                 if (right_motor < 0) right_motor = 0;
 
+
                 outByte1.Value = left_motor;
                 outByte2.Value = right_motor;
 
@@ -337,10 +377,33 @@ namespace BluetoothGUISample
                 left_motor = 127;
                 right_motor = 127;
             }
+
+            setBoxColors();
+            
+
             sendIO(2, (byte)left_motor);
             sendIO(3, (byte)right_motor);
             // read sensors
-            sendIO(0, ZERO);  // The value 0 indicates Input 1, ZERO just maintains a fixed value for the discarded data in order to maintain a consistent package format
+
+        }
+
+
+        private void setBoxColors()
+        {
+            // 
+            int r, g, b;
+            string hex_color;
+            b = 0;
+            r = left_motor;
+            g = 255 - left_motor;
+            hex_color = String.Format("#{0:X}{1:X}{2:X}",r,g,b);
+            pictureBox1.BackColor = ColorTranslator.FromHtml(hex_color);
+
+            r = left_motor;
+            g = 255 - left_motor;
+            hex_color = String.Format("#{0:X}{1:X}{2:X}", r, g, b);
+            pictureBox2.BackColor = ColorTranslator.FromHtml(hex_color);
+
 
         }
         
@@ -369,7 +432,8 @@ namespace BluetoothGUISample
             if (a < 0)      a = 0;
 
             if (outByte2.Focused != true)
-                outByte2.Value = (decimal)Math.Floor(a);
+                    if (operation_mode == 5)
+                        outByte2.Value = (decimal)Math.Floor(a);
         }
 
 
@@ -385,7 +449,8 @@ namespace BluetoothGUISample
             if (a < 0) a = 0;       
 
             if (OutputBox1.Focused != true)
-                OutputBox1.Value = (decimal)(a);
+                if (operation_mode == 5)
+                    OutputBox1.Value = (decimal)(a);
 
         }
         // Method controlling byte2 scrollbar value
@@ -462,9 +527,6 @@ namespace BluetoothGUISample
                 OutputBox1.Enabled = true;
                 OutputBox2.Enabled = true;
 
-                numericUpDown1.Enabled = true;
-                numericUpDown2.Enabled = true;
-                numericUpDown3.Enabled = true;
                 is_manual = true;
             }
             else
@@ -475,9 +537,7 @@ namespace BluetoothGUISample
                 outByte2.Enabled = false;
                 OutputBox1.Enabled = false;
                 OutputBox2.Enabled = false;
-                numericUpDown1.Enabled = false;
-                numericUpDown2.Enabled = false;
-                numericUpDown3.Enabled = false;
+
                 is_manual = false;
             }
         }
@@ -495,6 +555,16 @@ namespace BluetoothGUISample
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
         {
             I_T = (double)numericUpDown2.Value;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            left_motor = 127;
+            right_motor = 127;
+
+            error = 0;
+            total_error = 0;
+            prev_error = 0;
         }
     }
 

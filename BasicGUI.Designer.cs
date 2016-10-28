@@ -70,6 +70,9 @@
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
             this.label11 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.outByte1)).BeginInit();
@@ -78,11 +81,13 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // serial
             // 
-            this.serial.PortName = "COM10";
+            this.serial.PortName = "COM9";
             // 
             // getIOtimer
             // 
@@ -289,9 +294,8 @@
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label2.Location = new System.Drawing.Point(12, 273);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(536, 58);
+            this.label2.Size = new System.Drawing.Size(536, 10);
             this.label2.TabIndex = 14;
-            this.label2.Text = "asasdf";
             // 
             // label3
             // 
@@ -382,7 +386,6 @@
             // numericUpDown1
             // 
             this.numericUpDown1.DecimalPlaces = 2;
-            this.numericUpDown1.Enabled = false;
             this.numericUpDown1.Location = new System.Drawing.Point(132, 188);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             500,
@@ -469,7 +472,6 @@
             // numericUpDown2
             // 
             this.numericUpDown2.DecimalPlaces = 1;
-            this.numericUpDown2.Enabled = false;
             this.numericUpDown2.Location = new System.Drawing.Point(132, 218);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             500,
@@ -484,7 +486,6 @@
             // numericUpDown3
             // 
             this.numericUpDown3.DecimalPlaces = 2;
-            this.numericUpDown3.Enabled = false;
             this.numericUpDown3.Location = new System.Drawing.Point(132, 245);
             this.numericUpDown3.Maximum = new decimal(new int[] {
             500,
@@ -504,11 +505,40 @@
             this.label11.TabIndex = 34;
             this.label11.Text = "D_T";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(458, 99);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 35;
+            this.button1.Text = "Reset";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(415, 308);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(44, 50);
+            this.pictureBox1.TabIndex = 36;
+            this.pictureBox1.TabStop = false;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Location = new System.Drawing.Point(254, 308);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(62, 50);
+            this.pictureBox2.TabIndex = 37;
+            this.pictureBox2.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(560, 437);
+            this.Controls.Add(this.pictureBox2);
+            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.numericUpDown3);
             this.Controls.Add(this.numericUpDown2);
@@ -559,6 +589,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -606,6 +638,9 @@
         private System.Windows.Forms.NumericUpDown numericUpDown2;
         private System.Windows.Forms.NumericUpDown numericUpDown3;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox pictureBox2;
     }
 }
 
