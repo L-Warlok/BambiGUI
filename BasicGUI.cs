@@ -54,6 +54,7 @@ namespace BluetoothGUISample
 
         // used to add items to the dropdown menu
         private String[] operating_modes = { "Clockwise", "Counterclockwise", "Reverse Circle", "Squiggle", "Manual", "Stop" };
+        private String[] controllers = { "PID-BangBang", "PID 2" };
 
         // used to tell if the vehicle should be moving or stopped
         private bool is_running = false;
@@ -112,7 +113,13 @@ namespace BluetoothGUISample
             {
                 modeSelect_Box.Items.Add(mode);
             }
-            
+
+            foreach (String controller in controllers)
+            {
+                comboBox1.Items.Add(controller);
+            }
+            modeSelect_Box.SelectedIndex = 5; // set to stopped
+            comboBox1.SelectedIndex = 0;
             
             // Establish connection on the Virtual Serial Port
             if (open_serial_connection == true)
@@ -190,12 +197,12 @@ namespace BluetoothGUISample
                                 case 0: //Save the data to a variable and place in the textbox.
                                     //statusBox.Text = "Input1";
                                     Input1 = Inputs[2];
-                                    InputBox1.Text = Input1.ToString();
+                                    
                                     break;
                                 case 1: //Save the data to a variable and place in the textbox. 
                                     //statusBox.Text = "Input2";
                                     Input2 = Inputs[2];
-                                    InputBox2.Text = Input2.ToString();
+                                    
                                     break;
                             }
                         }
@@ -245,7 +252,10 @@ namespace BluetoothGUISample
                 int l_1 = left_sensor ^ 1; 
                 int r_1 = right_sensor ^ 1; // inverts sensor output
 
-                if (is_manual)
+
+                
+
+                if (operation_mode == 4) // if in manual_mode
                 {
                     bool l = force_left_sensor.Checked;
                     bool r = force_right_sensor.Checked;
@@ -270,7 +280,7 @@ namespace BluetoothGUISample
                  * be determined in what direction the robot is going and how
                  * its direction needs to be adjusted.
                  * */
-
+                int minl, minr;
                 switch (operation_mode)
                 {
                     case 0: // Clockwise: Right sensor on the inside of track: right sensor stays on line
@@ -278,7 +288,7 @@ namespace BluetoothGUISample
                         // turn clockwise towards the right
                         L_MAX = 1;
                         R_MAX = 1;
-                        int minl, minr;
+                        
                         if (l_1 == 1 && r_1 == 1)
                         {
                             adjustment_rate = 255;
@@ -298,18 +308,89 @@ namespace BluetoothGUISample
                         right_motor = (int)(R_MAX * 255 + adjustment_rate);
                         if (right_motor < minr) right_motor = minr;
                         break;
-                    case 1: // CCW: Left sensor on the inside of track, keep line under that
 
+
+                    case 1: // CCW: Left sensor on the inside of track, keep line under that
+                            
+                        L_MAX = 1;
+                        R_MAX = 1;
+                        
+                        if (l_1 == 1 && r_1 == 1)
+                        {
+                            adjustment_rate = 255;
+                            minl = 20;
+                            minr = 20;
+                        }
+                        else
+                        {
+                            adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                            minl = 127;
+                            minr = 127;
+                        }
+
+                        left_motor = (int)(L_MAX * 255 - adjustment_rate);
+
+                        if (left_motor < minl) left_motor = minl;
+                        right_motor = (int)(R_MAX * 255 + adjustment_rate);
+                        if (right_motor < minr) right_motor = minr;
+                        break;
 
 
                         break;
                     case 2: // Reverse CIRCLE
-                        // swap left and right
-                        // swap PWM
-                        // instead of outputting MAX*PWM output (1-MAX)*PWM
+                            // swap left and right
+                            // swap PWM
+                            // instead of outputting MAX*PWM output (1-MAX)*PWM
+
+                        L_MAX = 1;
+                        R_MAX = 1;
+
+                        if (l_1 == 1 && r_1 == 1)
+                        {
+                            adjustment_rate = 255;
+                            minl = 220;
+                            minr = 220;
+                        }
+                        else
+                        {
+                            adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                            minl = 127;
+                            minr = 127;
+                        }
+
+                        left_motor = (int)(L_MAX * 255 + adjustment_rate);
+                        right_motor = (int)(R_MAX * 255 - adjustment_rate);
+
+                        if (left_motor > minl) left_motor = minl;
+                        if (right_motor > minr) right_motor = minr;
+                        break;
+
 
                         break;
                     case 3: // Squiggle
+                        L_MAX = 1;
+                        R_MAX = 1;
+
+                        if (l_1 == 1 && r_1 == 1)
+                        {
+                            adjustment_rate = 255;
+                            minl = 20;
+                            minr = 20;
+                        }
+                        else
+                        {
+                            adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                            minl = 127;
+                            minr = 127;
+                        }
+
+                        left_motor = (int)(L_MAX * 255 - adjustment_rate);
+
+                        if (left_motor < minl) left_motor = minl;
+                        right_motor = (int)(R_MAX * 255 + adjustment_rate);
+                        if (right_motor < minr) right_motor = minr;
+                        break;
+
                         break;
                     case 4: // manual
                         left_motor = (byte)outByte1.Value;
@@ -487,7 +568,8 @@ namespace BluetoothGUISample
             if (a < 0) a = 0;
 
             if (OutputBox2.Focused != true)
-                OutputBox2.Value = (decimal)(a);
+                if (operation_mode == 5)
+                    OutputBox2.Value = (decimal)(a);
 
         }
         // handle input - dropdown box
@@ -504,11 +586,22 @@ namespace BluetoothGUISample
                 case 3:
                     is_running = true;
                     running_label.Text = "Running";
+                    outByte1.Enabled = false;
+                    outByte2.Enabled = false;
+                    OutputBox1.Enabled = false;
+                    OutputBox2.Enabled = false;
                     running_label.ForeColor = Color.Green;
                     break;
                 case 4:
                     is_running = true;
                     running_label.Text = "Manual Ctrl";
+                    if (checkBox1.Checked)
+                    {
+                        outByte1.Enabled = true;
+                        outByte2.Enabled = true;
+                        OutputBox1.Enabled = true;
+                        OutputBox2.Enabled = true;
+                    }
                     running_label.ForeColor = Color.Orange;
                     is_manual = true;
                     break;
@@ -545,11 +638,13 @@ namespace BluetoothGUISample
             {
                 force_left_sensor.Enabled = true;
                 force_right_sensor.Enabled = true;
-                outByte1.Enabled = true;
-                outByte2.Enabled = true;
-                OutputBox1.Enabled = true;
-                OutputBox2.Enabled = true;
-
+                if (operation_mode == 4)
+                {
+                    outByte1.Enabled = true;
+                    outByte2.Enabled = true;
+                    OutputBox1.Enabled = true;
+                    OutputBox2.Enabled = true;
+                }
                 is_manual = true;
             }
             else
@@ -560,7 +655,6 @@ namespace BluetoothGUISample
                 outByte2.Enabled = false;
                 OutputBox1.Enabled = false;
                 OutputBox2.Enabled = false;
-
                 is_manual = false;
             }
         }

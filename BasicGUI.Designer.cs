@@ -32,11 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.serial = new System.IO.Ports.SerialPort(this.components);
             this.getIOtimer = new System.Windows.Forms.Timer(this.components);
-            this.InputBox1 = new System.Windows.Forms.TextBox();
             this.OutputBox1 = new System.Windows.Forms.NumericUpDown();
-            this.Get1 = new System.Windows.Forms.Button();
-            this.Get2 = new System.Windows.Forms.Button();
-            this.InputBox2 = new System.Windows.Forms.TextBox();
             this.OutputBox2 = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -74,6 +70,8 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.label12 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.outByte1)).BeginInit();
@@ -97,15 +95,6 @@
             this.getIOtimer.Interval = 10;
             this.getIOtimer.Tick += new System.EventHandler(this.getIOtimer_Tick);
             // 
-            // InputBox1
-            // 
-            this.InputBox1.Location = new System.Drawing.Point(309, 36);
-            this.InputBox1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.InputBox1.Name = "InputBox1";
-            this.InputBox1.Size = new System.Drawing.Size(60, 20);
-            this.InputBox1.TabIndex = 0;
-            this.InputBox1.Text = "0";
-            // 
             // OutputBox1
             // 
             this.OutputBox1.DecimalPlaces = 1;
@@ -126,37 +115,6 @@
             0,
             0});
             this.OutputBox1.ValueChanged += new System.EventHandler(this.OutputBox1_ValueChanged);
-            // 
-            // Get1
-            // 
-            this.Get1.Location = new System.Drawing.Point(379, 36);
-            this.Get1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.Get1.Name = "Get1";
-            this.Get1.Size = new System.Drawing.Size(74, 23);
-            this.Get1.TabIndex = 4;
-            this.Get1.Text = "Input 1";
-            this.Get1.UseVisualStyleBackColor = true;
-            this.Get1.Click += new System.EventHandler(this.Get1_Click);
-            // 
-            // Get2
-            // 
-            this.Get2.Location = new System.Drawing.Point(379, 7);
-            this.Get2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.Get2.Name = "Get2";
-            this.Get2.Size = new System.Drawing.Size(74, 23);
-            this.Get2.TabIndex = 4;
-            this.Get2.Text = "Input 2";
-            this.Get2.UseVisualStyleBackColor = true;
-            this.Get2.Click += new System.EventHandler(this.Get2_Click);
-            // 
-            // InputBox2
-            // 
-            this.InputBox2.Location = new System.Drawing.Point(309, 10);
-            this.InputBox2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.InputBox2.Name = "InputBox2";
-            this.InputBox2.Size = new System.Drawing.Size(60, 20);
-            this.InputBox2.TabIndex = 0;
-            this.InputBox2.Text = "0";
             // 
             // OutputBox2
             // 
@@ -183,7 +141,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(115, 12);
+            this.label1.Location = new System.Drawing.Point(285, 9);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(127, 20);
@@ -285,7 +243,7 @@
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(43, 57);
+            this.label8.Location = new System.Drawing.Point(40, 56);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(123, 16);
             this.label8.TabIndex = 13;
@@ -544,11 +502,31 @@
             this.pictureBox3.TabIndex = 38;
             this.pictureBox3.TabStop = false;
             // 
+            // comboBox1
+            // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(96, 8);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(119, 21);
+            this.comboBox1.TabIndex = 39;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.Location = new System.Drawing.Point(11, 13);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(79, 16);
+            this.label12.TabIndex = 13;
+            this.label12.Text = "Controller:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(560, 513);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
@@ -574,6 +552,7 @@
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
+            this.Controls.Add(this.label12);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.modeSelect_Box);
             this.Controls.Add(this.outByte2);
@@ -583,12 +562,8 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.Get2);
-            this.Controls.Add(this.Get1);
             this.Controls.Add(this.OutputBox2);
             this.Controls.Add(this.OutputBox1);
-            this.Controls.Add(this.InputBox2);
-            this.Controls.Add(this.InputBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
@@ -615,12 +590,8 @@
         #endregion
 
         private System.Windows.Forms.Timer getIOtimer;
-        private System.Windows.Forms.TextBox InputBox1;
         private System.Windows.Forms.NumericUpDown OutputBox1;
         private System.IO.Ports.SerialPort serial;
-        private System.Windows.Forms.Button Get1;
-        private System.Windows.Forms.Button Get2;
-        private System.Windows.Forms.TextBox InputBox2;
         private System.Windows.Forms.NumericUpDown OutputBox2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label4;
@@ -658,6 +629,8 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.PictureBox pictureBox3;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Label label12;
     }
 }
 
