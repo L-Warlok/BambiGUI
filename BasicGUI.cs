@@ -566,7 +566,26 @@ namespace BluetoothGUISample
             total_error = 0;
             prev_error = 0;
         }
+
+        /////////////////////////////////
+        // stop when space is pressed
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Space)
+            {
+                is_running = false;
+                operation_mode = 5;                 // stop
+                modeSelect_Box.SelectedIndex = 5; // stop
+                return true;    // indicate that you handled this keystroke
+            }
+
+            // Call the base class
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
+
+    
+ 
 
 
 }
