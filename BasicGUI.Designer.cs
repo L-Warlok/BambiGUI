@@ -73,6 +73,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.outByte1)).BeginInit();
@@ -83,6 +84,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.SuspendLayout();
             // 
             // serial
@@ -292,7 +294,7 @@
             // label2
             // 
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label2.Location = new System.Drawing.Point(12, 273);
+            this.label2.Location = new System.Drawing.Point(12, 277);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(536, 10);
             this.label2.TabIndex = 14;
@@ -309,7 +311,7 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.connectionMessage});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 415);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 491);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(560, 22);
             this.statusStrip1.TabIndex = 16;
@@ -471,7 +473,7 @@
             // 
             // numericUpDown2
             // 
-            this.numericUpDown2.DecimalPlaces = 1;
+            this.numericUpDown2.DecimalPlaces = 2;
             this.numericUpDown2.Location = new System.Drawing.Point(132, 218);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             500,
@@ -499,7 +501,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(102, 245);
+            this.label11.Location = new System.Drawing.Point(98, 245);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(28, 13);
             this.label11.TabIndex = 34;
@@ -517,25 +519,37 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(415, 308);
+            this.pictureBox1.BackColor = System.Drawing.Color.Black;
+            this.pictureBox1.Location = new System.Drawing.Point(499, 418);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(44, 50);
+            this.pictureBox1.Size = new System.Drawing.Size(34, 50);
             this.pictureBox1.TabIndex = 36;
             this.pictureBox1.TabStop = false;
             // 
             // pictureBox2
             // 
-            this.pictureBox2.Location = new System.Drawing.Point(254, 308);
+            this.pictureBox2.BackColor = System.Drawing.Color.Black;
+            this.pictureBox2.Location = new System.Drawing.Point(406, 418);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(62, 50);
+            this.pictureBox2.Size = new System.Drawing.Size(37, 50);
             this.pictureBox2.TabIndex = 37;
             this.pictureBox2.TabStop = false;
+            // 
+            // pictureBox3
+            // 
+            this.pictureBox3.BackColor = System.Drawing.Color.Pink;
+            this.pictureBox3.Location = new System.Drawing.Point(433, 335);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(76, 110);
+            this.pictureBox3.TabIndex = 38;
+            this.pictureBox3.TabStop = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(560, 437);
+            this.ClientSize = new System.Drawing.Size(560, 513);
+            this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.button1);
@@ -592,6 +606,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -642,6 +657,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.PictureBox pictureBox3;
     }
 }
 

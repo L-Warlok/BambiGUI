@@ -242,8 +242,8 @@ namespace BluetoothGUISample
             if (is_running)
             {
 
-                int l_1 = left_sensor ^ 1;
-                int r_1 = right_sensor ^ 1;
+                int l_1 = left_sensor ^ 1; 
+                int r_1 = right_sensor ^ 1; // inverts sensor output
 
                 if (is_manual)
                 {
@@ -271,21 +271,6 @@ namespace BluetoothGUISample
                  * its direction needs to be adjusted.
                  * */
 
-
-
-
-                // set error to be current position - half of max position.
-                // is either 1, 0, or -1;
-
-
-                // unused currently
-                // may be of use later
-                // to be determined
-                //if (left_sensor == 1) left_sensor = LINE;
-                //if (right_sensor == 1) right_sensor = LINE;
-                //if (left_sensor == 0) left_sensor = NO_LINE;
-                //if (right_sensor == 0) right_sensor = NO_LINE;
-
                 switch (operation_mode)
                 {
                     case 0: // Clockwise: Right sensor on the inside of track: right sensor stays on line
@@ -311,7 +296,7 @@ namespace BluetoothGUISample
                         
                         if (left_motor < minl) left_motor = minl;
                         right_motor = (int)(R_MAX * 255 + adjustment_rate);
-                        if (right_motor < minr) right_motor = minl;
+                        if (right_motor < minr) right_motor = minr;
                         break;
                     case 1: // CCW: Left sensor on the inside of track, keep line under that
 
@@ -378,8 +363,8 @@ namespace BluetoothGUISample
                 right_motor = 127;
             }
 
+
             setBoxColors();
-            
 
             sendIO(2, (byte)left_motor);
             sendIO(3, (byte)right_motor);
@@ -391,18 +376,56 @@ namespace BluetoothGUISample
         private void setBoxColors()
         {
             // 
+            
             int r, g, b;
-            string hex_color;
             b = 0;
-            r = left_motor;
-            g = 255 - left_motor;
-            hex_color = String.Format("#{0:X}{1:X}{2:X}",r,g,b);
-            pictureBox1.BackColor = ColorTranslator.FromHtml(hex_color);
 
-            r = left_motor;
-            g = 255 - left_motor;
-            hex_color = String.Format("#{0:X}{1:X}{2:X}", r, g, b);
-            pictureBox2.BackColor = ColorTranslator.FromHtml(hex_color);
+            if (left_motor <= 127)
+            {
+                r = 2 * (127 - left_motor);
+                g = 0;
+            }
+            else
+            {
+                g = 2 * (left_motor - 127);
+                r = 0; // because of how maths works.
+            }
+
+            if (r > 255)
+                r = 255;
+            if (r < 0)
+                r = 0;
+
+            if (g > 255)
+                g = 255;
+            if (g < 0)
+                g = 0;
+
+            
+            pictureBox2.BackColor = ColorTranslator.FromWin32(r + 256*g);
+            b = 0x00;
+
+            if (right_motor <= 127)
+            {
+                r = 2 * (127 - right_motor);
+                g = 0;
+            }
+            else
+            {
+                g = 2 * (right_motor - 127);
+                r = 0; 
+            }
+
+            if (r > 255)
+                r = 255;
+            if (r < 0)
+                r = 0;
+
+            if (g > 255)
+                g = 255;
+            if (g < 0)
+                g = 0;
+            pictureBox1.BackColor = ColorTranslator.FromWin32(r + 256*g + b);
 
 
         }
@@ -441,7 +464,7 @@ namespace BluetoothGUISample
         // Method controlling byte1 scrollbar value
         private void outByte1_ValueChanged(object sender, EventArgs e)
         {
-            double b_in = (double)outByte2.Value;
+            double b_in = (double)outByte1.Value;
 
             double a = (b_in - K1) / K2; // the reciprocal of the equation obtained via linear regression
 
