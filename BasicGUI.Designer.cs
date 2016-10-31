@@ -38,8 +38,8 @@
             this.label4 = new System.Windows.Forms.Label();
             this.dutyCycle = new System.Windows.Forms.Label();
             this.mainLoop = new System.Windows.Forms.Timer(this.components);
-            this.leftMotor = new System.Windows.Forms.Label();
-            this.rightMotor = new System.Windows.Forms.Label();
+            this.leftMotorLabel = new System.Windows.Forms.Label();
+            this.rightMotorLabel = new System.Windows.Forms.Label();
             this.leftByte = new System.Windows.Forms.NumericUpDown();
             this.rightByte = new System.Windows.Forms.NumericUpDown();
             this.modeSelect = new System.Windows.Forms.ComboBox();
@@ -86,11 +86,6 @@
             // 
             this.leftDuty.DecimalPlaces = 1;
             this.leftDuty.Enabled = false;
-            this.leftDuty.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
             this.leftDuty.Location = new System.Drawing.Point(254, 125);
             this.leftDuty.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.leftDuty.Name = "leftDuty";
@@ -101,17 +96,12 @@
             0,
             0,
             0});
-            this.leftDuty.ValueChanged += new System.EventHandler(this.OutputSpeedLeft_ValueChanged);
+            this.leftDuty.ValueChanged += new System.EventHandler(this.outSpeedLeft_ValueChanged);
             // 
             // rightDuty
             // 
             this.rightDuty.DecimalPlaces = 1;
             this.rightDuty.Enabled = false;
-            this.rightDuty.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
             this.rightDuty.Location = new System.Drawing.Point(331, 125);
             this.rightDuty.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.rightDuty.Name = "rightDuty";
@@ -122,7 +112,7 @@
             0,
             0,
             0});
-            this.rightDuty.ValueChanged += new System.EventHandler(this.OutputSpeedRight_ValueChanged);
+            this.rightDuty.ValueChanged += new System.EventHandler(this.outSpeedRight_ValueChanged);
             // 
             // Title
             // 
@@ -158,25 +148,25 @@
             this.mainLoop.Enabled = true;
             this.mainLoop.Tick += new System.EventHandler(this.sendLoopTimer_Tick);
             // 
-            // leftMotor
+            // leftMotorLabel
             // 
-            this.leftMotor.AutoSize = true;
-            this.leftMotor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.leftMotor.Location = new System.Drawing.Point(252, 109);
-            this.leftMotor.Name = "leftMotor";
-            this.leftMotor.Size = new System.Drawing.Size(65, 13);
-            this.leftMotor.TabIndex = 8;
-            this.leftMotor.Text = "Left Motor";
+            this.leftMotorLabel.AutoSize = true;
+            this.leftMotorLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.leftMotorLabel.Location = new System.Drawing.Point(252, 109);
+            this.leftMotorLabel.Name = "leftMotorLabel";
+            this.leftMotorLabel.Size = new System.Drawing.Size(65, 13);
+            this.leftMotorLabel.TabIndex = 8;
+            this.leftMotorLabel.Text = "Left Motor";
             // 
-            // rightMotor
+            // rightMotorLabel
             // 
-            this.rightMotor.AutoSize = true;
-            this.rightMotor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rightMotor.Location = new System.Drawing.Point(328, 109);
-            this.rightMotor.Name = "rightMotor";
-            this.rightMotor.Size = new System.Drawing.Size(73, 13);
-            this.rightMotor.TabIndex = 8;
-            this.rightMotor.Text = "Right Motor";
+            this.rightMotorLabel.AutoSize = true;
+            this.rightMotorLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rightMotorLabel.Location = new System.Drawing.Point(328, 109);
+            this.rightMotorLabel.Name = "rightMotorLabel";
+            this.rightMotorLabel.Size = new System.Drawing.Size(73, 13);
+            this.rightMotorLabel.TabIndex = 8;
+            this.rightMotorLabel.Text = "Right Motor";
             // 
             // leftByte
             // 
@@ -441,8 +431,8 @@
             this.Controls.Add(this.modeSelect);
             this.Controls.Add(this.rightByte);
             this.Controls.Add(this.leftByte);
-            this.Controls.Add(this.rightMotor);
-            this.Controls.Add(this.leftMotor);
+            this.Controls.Add(this.rightMotorLabel);
+            this.Controls.Add(this.leftMotorLabel);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.dutyCycle);
             this.Controls.Add(this.Title);
@@ -481,8 +471,8 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label dutyCycle;
         private System.Windows.Forms.Timer mainLoop;
-        private System.Windows.Forms.Label leftMotor;
-        private System.Windows.Forms.Label rightMotor;
+        private System.Windows.Forms.Label leftMotorLabel;
+        private System.Windows.Forms.Label rightMotorLabel;
         private System.Windows.Forms.NumericUpDown leftByte;
         private System.Windows.Forms.NumericUpDown rightByte;
         private System.Windows.Forms.ComboBox modeSelect;
