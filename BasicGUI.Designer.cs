@@ -72,6 +72,7 @@
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.label12 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.outByte1)).BeginInit();
@@ -146,7 +147,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(127, 20);
             this.label1.TabIndex = 6;
-            this.label1.Text = "Bambi GUI 1.0";
+            this.label1.Text = "Bambi GUI 2.0";
             // 
             // label4
             // 
@@ -510,6 +511,7 @@
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(119, 21);
             this.comboBox1.TabIndex = 39;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // label12
             // 
@@ -520,6 +522,14 @@
             this.label12.Size = new System.Drawing.Size(79, 16);
             this.label12.TabIndex = 13;
             this.label12.Text = "Controller:";
+            // 
+            // label13
+            // 
+            this.label13.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label13.Location = new System.Drawing.Point(12, 43);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(536, 1);
+            this.label13.TabIndex = 15;
             // 
             // Form1
             // 
@@ -550,6 +560,7 @@
             this.Controls.Add(this.state_label);
             this.Controls.Add(this.running_label);
             this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.label13);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label12);
@@ -631,6 +642,7 @@
         private System.Windows.Forms.PictureBox pictureBox3;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label13;
     }
 }
 
