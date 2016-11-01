@@ -15,12 +15,12 @@ using System.Windows.Forms;
 
 namespace BluetoothGUISample
 {
-    
+
     public partial class Form1 : Form
     {
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-         // sensor position on the board
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // sensor position on the board
         public const byte SENSOR1_POS = 0;  // position of sensor 1 within the INPUT BYTE
         public const byte SENSOR2_POS = 1;  // position of sensor 2 within the INPUT BYTE
 
@@ -37,7 +37,7 @@ namespace BluetoothGUISample
         public const double DAC_MIN = 0;
         public const double DAC1_MAX = 8.0; // DAC 1 max voltage
         public const double DAC2_MAX = 8.0; // dac 2 max voltage
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         // Declare variables to store inputs and outputs.
         bool open_serial_connection = true;
@@ -53,8 +53,11 @@ namespace BluetoothGUISample
         const byte ZERO = 0;
 
         // used to add items to the dropdown menu
-        private String[] operating_modes = { "Clockwise", "Counterclockwise", "Reverse Circle", "Squiggle", "Manual", "Stop" };
-        private String[] controllers = { "PID-BangBang", "PID 2" };
+
+        private enum modes { CLOCKWISE, COUNTERCLOCKWISE, REVERSE_CIRCLE, SQUIGGLE, MANUAL, STOP }
+        private enum controllers { PID_BangBang, PID_2 }
+
+
 
         // used to tell if the vehicle should be moving or stopped
         private bool is_running = false;
@@ -105,15 +108,8 @@ namespace BluetoothGUISample
 
             is_running = false;
 
-            foreach (String mode in operating_modes) // add the items to the dropdown menu
-            {
-                modeSelect_Box.Items.Add(mode);
-            }
-
-            foreach (String controller in controllers)
-            {
-                comboBox1.Items.Add(controller);
-            }
+            modeSelect_Box.DataSource = Enum.GetValues(typeof(modes));
+            comboBox1.DataSource = Enum.GetValues(typeof(controllers));
             modeSelect_Box.SelectedIndex = 5; // set to stopped
             comboBox1.SelectedIndex = 0;
             
@@ -244,8 +240,8 @@ namespace BluetoothGUISample
             int left_sensor = ((1 << SENSOR1_POS) & Input2);
             int right_sensor = ((1 << SENSOR2_POS) & Input2) >> SENSOR2_POS;
 
-
-            sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
+            if (!checkBox1.Checked)
+                sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
             // sensor_readings_label.Text = String.Format("1: {0} 2: {1}", Input1, Input2);
             int l_1 = left_sensor ^ 1;
             int r_1 = right_sensor ^ 1;
@@ -254,9 +250,7 @@ namespace BluetoothGUISample
                 switch (comboBox1.SelectedIndex)
                 {
                     case 0: // if in controller 1 mode
-                        
-
-                        if (operation_mode == 4) // if in manual_mode
+                        if (checkBox1.Checked) // if in manual_mode
                         {
                             bool l = force_left_sensor.Checked;
                             bool r = force_right_sensor.Checked;
@@ -266,7 +260,7 @@ namespace BluetoothGUISample
                             if (r) right_sensor = 1;
                             else right_sensor = 0;
                         }
-                        else
+                        else if (operation_mode != 5) // not in stop mode
                         {
                             error = (l_1 + r_1) - 1;
                             total_error += error;
@@ -431,7 +425,21 @@ namespace BluetoothGUISample
                             case 0: // clockwise
                             case 1: // ccw 
                             case 3: // squiggle
-                                
+                                if (checkBox1.Checked)
+                                {
+                                    bool l = force_left_sensor.Checked;
+                                    bool r = force_right_sensor.Checked;
+
+                                    
+
+                                    l_1 = (l) ? 1 : 0;
+                                    r_1 = (r) ? 1 : 0;
+
+                                    left_sensor = l_1;
+                                    right_sensor = r_1;
+
+                                    sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
+                                }
                                 switch (state)
                                 {
                                     case OpStates.STOPPED:
@@ -450,11 +458,11 @@ namespace BluetoothGUISample
                                         {
                                             ticks_adjusting = 0; // resets for how long it's been adjusting for
                                             state = OpStates.ADJUSTING; // state now is adjusting
-                                            if (l_1 == 0 && r_1 == 1)
+                                            if (r_1 == 1)
                                             {
                                                 adjustment_direction = LEFT;
                                             }
-                                            else if (l_1 == 1 && r_1 == 0)
+                                            else
                                             { 
                                                 adjustment_direction = RIGHT;
                                             }   
@@ -468,7 +476,7 @@ namespace BluetoothGUISample
                                         ticks_adjusting++; // increment for how long it's been adjusting
 
                                         // becomes negative or positive depending on whether the cart must turn left or right
-                                        adjustment_rate = adjustment_direction * (K_T + D_T / (ticks_on_line) + I_T * (ticks_adjusting)); // golden formula
+                                        adjustment_rate = adjustment_direction * (K_T + D_T / ( (ticks_on_line == 0 ? 1 : ticks_on_line)) + I_T * (ticks_adjusting)); // golden formula
                                         left_motor = (int)(L_MAX * 255 - adjustment_rate);
                                         right_motor = (int)(R_MAX * 255 + adjustment_rate);
 
@@ -512,7 +520,14 @@ namespace BluetoothGUISample
                                 Console.WriteLine(String.Format("Error. Operation mode invalid: {0}\n", operation_mode));
                                 break;
                         }
-                        
+
+                        deltaT_label.Text = "Ticks: " + tick.ToString();
+                        last_adj_ms_label.Text = "Ticks Adjustment: + " + ticks_adjusting.ToString();
+                        adj_dir_label.Text = "Ticks on line: " + ticks_on_line.ToString();
+                        adj_rate_label.Text = "Adj rate: " + adjustment_rate.ToString();
+                        prev_adj_label.Text = "Adj Direction: " + ((adjustment_direction == LEFT) ? "Left" : "Right");
+                        prev_adj_r_label.Text = "State: " + state.ToString();
+
                         break;
 
 
@@ -675,8 +690,7 @@ namespace BluetoothGUISample
                 case 1:
                 case 2:
                 case 3:
-                    is_running = true;
-                    running_label.Text = "Running";
+                    running_label.Text = "Ready";
                     outByte1.Enabled = false;
                     outByte2.Enabled = false;
                     OutputBox1.Enabled = false;
@@ -754,6 +768,10 @@ namespace BluetoothGUISample
             error = 0;
             total_error = 0;
             prev_error = 0;
+
+            // reset
+            ticks_on_line = 0;
+            tick = 0;
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -769,9 +787,19 @@ namespace BluetoothGUISample
         {
             if (keyData == Keys.Space)
             {
-                is_running = false;
-                operation_mode = 5;                 // stop
-                modeSelect_Box.SelectedIndex = 5; // stop
+                if (is_running == true)
+                {
+                    running_label.Text = "Stopped";
+                    running_label.ForeColor = Color.Red;
+                    is_running = false;
+                    
+                }
+                else
+                {
+                    running_label.Text = "Started";
+                    running_label.ForeColor = Color.Green;
+                    is_running = true;
+                }
                 return true;    // indicate that you handled this keystroke
             }
 
