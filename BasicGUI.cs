@@ -289,6 +289,7 @@ namespace BluetoothGUISample
                                     adjustment_rate = 255;
                                     minl = 20;
                                     minr = 20;
+                                    total_error = 0;
                                 }
                                 else
                                 {
@@ -315,6 +316,7 @@ namespace BluetoothGUISample
                                     adjustment_rate = 255;
                                     minl = 20;
                                     minr = 20;
+                                    total_error = 0;
                                 }
                                 else
                                 {
@@ -343,6 +345,7 @@ namespace BluetoothGUISample
                                     adjustment_rate = 255;
                                     minl = 20;
                                     minr = 20;
+                                    total_error = 0;
                                 }
                                 else
                                 {
