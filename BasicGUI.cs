@@ -454,7 +454,7 @@ namespace BluetoothGUISample
                                         left_motor = (int)L_MAX * 255;
                                         right_motor = (int)R_MAX * 255;
 
-                                        if (l_1 != 1) // if left sensor is not on the line, 
+                                        if (l_1 != 1 || r_1 == 1) // if left sensor is not on the line, 
                                         {
                                             ticks_adjusting = 0; // resets for how long it's been adjusting for
                                             state = OpStates.ADJUSTING; // state now is adjusting
@@ -485,7 +485,7 @@ namespace BluetoothGUISample
                                         if (right_motor < 127) right_motor = 127;
                                         if (right_motor > 255) right_motor = 255;
 
-                                        if (l_1 == 1)
+                                        if (l_1 == 1 && r_1 == 0)
                                         {
                                             state = OpStates.STRAIGHT;
                                             ticks_on_line = 0;
