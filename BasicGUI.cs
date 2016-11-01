@@ -345,8 +345,31 @@ namespace BluetoothGUISample
                                     // swap PWM
                                     // instead of outputting MAX*PWM output (1-MAX)*PWM
 
-                                L_MAX = 1;
-                                R_MAX = 1;
+                                L_MAX = 0.6;
+                                R_MAX = 0.6;
+
+                                if ((l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
+                                {
+                                    // total_error = (int)(0.8*total_error);
+                                    total_error = (int)(0.8 * total_error);
+                                }
+                                adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                                minl = 255 - 80;
+                                minr = 255 - 80;
+
+
+                                left_motor = 255 - (int)(L_MAX * 255 - adjustment_rate);
+                                if (left_motor > minl) left_motor = minl;
+                                right_motor = 255 - (int)(R_MAX * 255 + adjustment_rate);
+                                if (right_motor > minr) right_motor = minr;
+                                break;
+
+
+                            case 3: // Squiggle
+                                    // left motor speed slightly higher than right motor speed to force it to slowly
+                                    // turn clockwise towards the right
+                                L_MAX = 0.75;
+                                R_MAX = 0.75;
 
                                 if ((l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
                                 {
@@ -358,34 +381,12 @@ namespace BluetoothGUISample
                                 minr = 80;
 
 
-                                left_motor = (int)(L_MAX * 255 - adjustment_rate);
+                                left_motor = ((int)(L_MAX*255 - adjustment_rate));
                                 if (left_motor < minl) left_motor = minl;
-                                right_motor = (int)(R_MAX * 255 + adjustment_rate);
-                                if (right_motor < minr) right_motor = minr;
-                                break;
-
-
-                            case 3: // Squiggle
-                                    // left motor speed slightly higher than right motor speed to force it to slowly
-                                    // turn clockwise towards the right
-                                L_MAX = 1;
-                                R_MAX = 1;
-
-                                if ((l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
-                                {
-                                    total_error = (int)(0.8 * total_error);
-                                }
-                                adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                                minl = 60;
-                                minr = 60;
-
-
-                                left_motor = (int)(L_MAX * 255 - adjustment_rate);
-                                if (left_motor < minl) left_motor = minl;
-                                right_motor = (int)(R_MAX * 255 + adjustment_rate);
+                                right_motor = ((int)(L_MAX*255 + adjustment_rate));
                                 if (right_motor < minr) right_motor = minr;
 
-
+                                
 
                                 break;
 

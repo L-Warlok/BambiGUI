@@ -170,7 +170,6 @@
             // mainLoop
             // 
             this.mainLoop.Enabled = true;
-            this.mainLoop.Interval = 25;
             this.mainLoop.Tick += new System.EventHandler(this.sendLoopTimer_Tick);
             // 
             // label6
