@@ -216,9 +216,9 @@ namespace BluetoothGUISample
         private double previous_adjustment_rate = 0; // 
         
         // adjustment rate constant 
-        private double K_T = 0.6;
+        private double K_T = 55;
         private double I_T = 0;
-        private double D_T = 50;
+        private double D_T = 20;
         // error
         private int error = 1; // MAX error is 2
         private int prev_error = 0;
@@ -231,6 +231,7 @@ namespace BluetoothGUISample
         private int ticks_on_line = 0;
         private int ticks_adjusting = 0; // used to keep track of how long it's been turning for
         
+
         // main loop 
         private void sendLoopTimer_Tick(object sender, EventArgs e)
         {
@@ -245,6 +246,18 @@ namespace BluetoothGUISample
             // sensor_readings_label.Text = String.Format("1: {0} 2: {1}", Input1, Input2);
             int l_1 = left_sensor ^ 1;
             int r_1 = right_sensor ^ 1;
+
+            int bonus = 0;
+
+            if (left_sensor == 0 && right_sensor != 0)
+            {
+                bonus = 1;
+            }
+            if (left_sensor != 0 && right_sensor == 0)
+            {
+                bonus = -1;
+            }
+
             if (is_running)
             {
                 switch (comboBox1.SelectedIndex)
@@ -262,7 +275,7 @@ namespace BluetoothGUISample
                         }
                         else if (operation_mode != 5) // not in stop mode
                         {
-                            error = (l_1 + r_1) - 1;
+                            error = (l_1 - r_1) + bonus ;
                             total_error += error;
                         }
                         sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
@@ -284,55 +297,50 @@ namespace BluetoothGUISample
                                 L_MAX = 1;
                                 R_MAX = 1;
 
-                                if (l_1 == 1 && r_1 == 1)
+                                if ( (l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error) ) )
                                 {
-                                    adjustment_rate = 255;
-                                    minl = 20;
-                                    minr = 20;
-                                    total_error = 0;
+                                    // total_error = (int)(0.8*total_error);
+                                    total_error = (int)(0.8 * total_error);
                                 }
-                                else
-                                {
-                                    adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                                    minl = 127;
-                                    minr = 127;
-                                }
+                                adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                                minl = 80;
+                                minr = 80;
+                                
 
                                 left_motor = (int)(L_MAX * 255 - adjustment_rate);
-
                                 if (left_motor < minl) left_motor = minl;
                                 right_motor = (int)(R_MAX * 255 + adjustment_rate);
                                 if (right_motor < minr) right_motor = minr;
+
+
+
                                 break;
 
 
                             case 1: // CCW: Left sensor on the inside of track, keep line under that
-
-                                L_MAX = 1;
+                                    // left motor speed slightly higher than right motor speed to force it to slowly
+                                    // turn clockwise towards the right
+                                L_MAX = 0.9;
                                 R_MAX = 1;
 
-                                if (l_1 == 1 && r_1 == 1)
+                                if ((l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
                                 {
-                                    adjustment_rate = 255;
-                                    minl = 20;
-                                    minr = 20;
-                                    total_error = 0;
+                                    // total_error = (int)(0.8*total_error);
+                                    total_error = (int)(0.8 * total_error);
                                 }
-                                else
-                                {
-                                    adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                                    minl = 127;
-                                    minr = 127;
-                                }
+                                adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                                minl = 80;
+                                minr = 80;
+
 
                                 left_motor = (int)(L_MAX * 255 - adjustment_rate);
-
                                 if (left_motor < minl) left_motor = minl;
                                 right_motor = (int)(R_MAX * 255 + adjustment_rate);
                                 if (right_motor < minr) right_motor = minr;
+
                                 break;
 
-                            case 2: // Reverse CIRCLE
+                            case 2: //  reverese CIRCLE
                                     // swap left and right
                                     // swap PWM
                                     // instead of outputting MAX*PWM output (1-MAX)*PWM
@@ -340,55 +348,47 @@ namespace BluetoothGUISample
                                 L_MAX = 1;
                                 R_MAX = 1;
 
-                                if (l_1 == 1 && r_1 == 1)
+                                if ((l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
                                 {
-                                    adjustment_rate = 255;
-                                    minl = 20;
-                                    minr = 20;
-                                    total_error = 0;
+                                    // total_error = (int)(0.8*total_error);
+                                    total_error = (int)(0.8 * total_error);
                                 }
-                                else
-                                {
-                                    adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                                    minl = 127;
-                                    minr = 127;
-                                }
+                                adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                                minl = 80;
+                                minr = 80;
 
-                                left_motor = (int)(L_MAX * 255 + adjustment_rate);
-                                right_motor = (int)(R_MAX * 255 - adjustment_rate);
-
-                                left_motor = 255 - left_motor;
-                                right_motor = 255 - right_motor;
-
-                                if (left_motor < minl) left_motor = minl;
-                                if (right_motor < minr) right_motor = minr;
-                                break;
-
-                                
-                            case 3: // Squiggle
-                                L_MAX = 1;
-                                R_MAX = 1;
-
-                                if (l_1 == 1 && r_1 == 1)
-                                {
-                                    adjustment_rate = 255;
-                                    minl = 20;
-                                    minr = 20;
-                                }
-                                else
-                                {
-                                    adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                                    minl = 127;
-                                    minr = 127;
-                                }
 
                                 left_motor = (int)(L_MAX * 255 - adjustment_rate);
-
                                 if (left_motor < minl) left_motor = minl;
                                 right_motor = (int)(R_MAX * 255 + adjustment_rate);
                                 if (right_motor < minr) right_motor = minr;
                                 break;
-                                
+
+
+                            case 3: // Squiggle
+                                    // left motor speed slightly higher than right motor speed to force it to slowly
+                                    // turn clockwise towards the right
+                                L_MAX = 1;
+                                R_MAX = 1;
+
+                                if ((l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
+                                {
+                                    total_error = (int)(0.8 * total_error);
+                                }
+                                adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                                minl = 60;
+                                minr = 60;
+
+
+                                left_motor = (int)(L_MAX * 255 - adjustment_rate);
+                                if (left_motor < minl) left_motor = minl;
+                                right_motor = (int)(R_MAX * 255 + adjustment_rate);
+                                if (right_motor < minr) right_motor = minr;
+
+
+
+                                break;
+
                             case 4: // manual
                                 left_motor = (byte)outByte1.Value;
                                 right_motor = (byte)outByte2.Value;
@@ -454,8 +454,10 @@ namespace BluetoothGUISample
                                         break;
                                     case OpStates.STRAIGHT:
                                         tick++;
-                                        left_motor = (int)L_MAX * 255;
-                                        right_motor = (int)R_MAX * 255;
+                                        left_motor = (int)L_MAX * 255 - (int)adjustment_rate;
+                                        right_motor = (int)R_MAX * 255 + (int)adjustment_rate;
+
+                                        
 
                                         if (l_1 != 1 || r_1 == 1) // if left sensor is not on the line, 
                                         {
@@ -492,6 +494,10 @@ namespace BluetoothGUISample
                                         {
                                             state = OpStates.STRAIGHT;
                                             ticks_on_line = 0;
+                                        }
+                                        if (r_1 == 1)
+                                        {
+                                            adjustment_direction = LEFT;
                                         }
 
                                         break;
