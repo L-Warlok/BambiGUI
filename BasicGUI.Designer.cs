@@ -69,6 +69,7 @@
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.label13 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.outByte1)).BeginInit();
@@ -166,6 +167,7 @@
             // mainLoop
             // 
             this.mainLoop.Enabled = true;
+            this.mainLoop.Interval = 25;
             this.mainLoop.Tick += new System.EventHandler(this.sendLoopTimer_Tick);
             // 
             // label6
@@ -489,11 +491,21 @@
             this.label13.Size = new System.Drawing.Size(536, 1);
             this.label13.TabIndex = 15;
             // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(255, 202);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(40, 13);
+            this.label12.TabIndex = 39;
+            this.label12.Text = "Bonus:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(560, 513);
+            this.Controls.Add(this.label12);
             this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
@@ -593,6 +605,7 @@
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.PictureBox pictureBox3;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label12;
     }
 }
 
