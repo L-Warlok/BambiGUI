@@ -253,7 +253,7 @@ namespace BluetoothGUISample
                     if (r) right_sensor = 1;
                     else right_sensor = 0;
                 }
-                else if (operation_mode != 5) // not in stop mode
+                else if (operation_mode != STOP) // not in stop mode
                 {
                     error = (right_sensor - left_sensor) ;
                     total_error += error + bonus;
@@ -269,11 +269,13 @@ namespace BluetoothGUISample
                 switch (operation_mode)
                 {
                     case CLOCKWISE: // Clockwise:
+                    case SQUIGGLE: // Squiggle
+                    case COUNTERCLOCKWISE: // CCW: 
                         L_MAX = 1;
                         R_MAX = 1;
 
                         // start reducing error if line was crossed to prevent the integral component to cause spinning
-                        if ( (left_sensor == 1 && right_sensor == 1) || (Math.Sign(error) != Math.Sign(prev_error) ) )
+                        if ( (left_sensor == 0 && right_sensor == 0 ) || (Math.Sign(error) != Math.Sign(prev_error) ) )
                         {
                             
                             total_error = (int)(0.6 * total_error);
@@ -291,42 +293,16 @@ namespace BluetoothGUISample
                         break;
 
 
-                    case COUNTERCLOCKWISE: // CCW: 
-                                          
-                        L_MAX = 1;
-                        R_MAX = 1;
-
-                        // start reducing error if line was crossed to prevent the integral component to cause spinning
-                        if ((left_sensor == 1 && right_sensor == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
-                        {
-                         
-                            total_error = (int)(0.6 * total_error);
-                            bonus = 0;
-                        }
-                        adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                        minl = 60;
-                        minr = 60;
-
-                        
-                        left_motor = (int)(L_MAX * 255 + adjustment_rate);
-                        right_motor = (int)(R_MAX * 255 - adjustment_rate);
-
-                        // limit minimum values of left and right motor to prevent spinning in circles
-                        if (left_motor < minl) left_motor = minl;
-                        if (right_motor < minr) right_motor = minr;
-                        break;
-
-
+                 
                     case REVERSE_CIRCLE: //  reverese CIRCLE
 
                         L_MAX = 0.6;
                         R_MAX = 0.6;
                         // start reducing error if line was crossed to prevent the integral component to cause spinning
-                        if ((left_sensor == 0 && right_sensor == 0) || (Math.Sign(error) != Math.Sign(prev_error)))
+                        if ((left_sensor == 1 && right_sensor == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
                         {
                             total_error = (int)(0.6 * total_error);
                         }
-
                         
                         adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
                         minl = 200; // minimum motor value
@@ -339,30 +315,6 @@ namespace BluetoothGUISample
                         // limit minimum values of left and right motor to prevent spinning in circles
                         if (left_motor > minl) left_motor = minl;
                         if (right_motor > minr) right_motor = minr;
-                        
-                        break;
-
-                    case SQUIGGLE: // Squiggle
-                                   
-                        L_MAX = 1;
-                        R_MAX = 1;
-
-                        // start reducing error if line was crossed to prevent the integral component to cause spinning
-                        if ((left_sensor == 1 && right_sensor == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
-                        {
-                            
-                            total_error = (int)(0.5 * total_error);
-                            bonus = 0;
-                        }
-                        adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                        minl = 60;
-                        minr = 60;
-
-                        left_motor = (int)(L_MAX * 255 + adjustment_rate);
-                        right_motor = (int)(R_MAX * 255 - adjustment_rate);
-                        // limit minimum values of left and right motor to prevent spinning in circles
-                        if (left_motor < minl) left_motor = minl;
-                        if (right_motor < minr) right_motor = minr;
                         
                         break;
 
@@ -396,6 +348,8 @@ namespace BluetoothGUISample
                 left_motor = 127;
                 right_motor = 127;
             }
+
+            
 
             if (left_motor > 255) left_motor = 255;
             if (right_motor > 255) right_motor = 255;
