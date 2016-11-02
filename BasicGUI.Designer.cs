@@ -59,9 +59,7 @@
             this.adj_rate_label = new System.Windows.Forms.Label();
             this.prev_adj_label = new System.Windows.Forms.Label();
             this.adj_dir_label = new System.Windows.Forms.Label();
-            this.deltaT_label = new System.Windows.Forms.Label();
             this.prev_adj_r_label = new System.Windows.Forms.Label();
-            this.last_adj_ms_label = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
@@ -70,8 +68,6 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox2)).BeginInit();
@@ -142,7 +138,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(285, 9);
+            this.label1.Location = new System.Drawing.Point(195, 9);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(127, 20);
@@ -394,15 +390,6 @@
             this.adj_dir_label.TabIndex = 27;
             this.adj_dir_label.Text = "Adj Direction:";
             // 
-            // deltaT_label
-            // 
-            this.deltaT_label.AutoSize = true;
-            this.deltaT_label.Location = new System.Drawing.Point(251, 194);
-            this.deltaT_label.Name = "deltaT_label";
-            this.deltaT_label.Size = new System.Drawing.Size(40, 13);
-            this.deltaT_label.TabIndex = 29;
-            this.deltaT_label.Text = "deltaT:";
-            // 
             // prev_adj_r_label
             // 
             this.prev_adj_r_label.AutoSize = true;
@@ -411,15 +398,6 @@
             this.prev_adj_r_label.Size = new System.Drawing.Size(76, 13);
             this.prev_adj_r_label.TabIndex = 30;
             this.prev_adj_r_label.Text = "Prev Adj Rate:";
-            // 
-            // last_adj_ms_label
-            // 
-            this.last_adj_ms_label.AutoSize = true;
-            this.last_adj_ms_label.Location = new System.Drawing.Point(328, 194);
-            this.last_adj_ms_label.Name = "last_adj_ms_label";
-            this.last_adj_ms_label.Size = new System.Drawing.Size(64, 13);
-            this.last_adj_ms_label.TabIndex = 31;
-            this.last_adj_ms_label.Text = "Last Adj ms:";
             // 
             // label10
             // 
@@ -503,26 +481,6 @@
             this.pictureBox3.TabIndex = 38;
             this.pictureBox3.TabStop = false;
             // 
-            // comboBox1
-            // 
-            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(96, 8);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(119, 21);
-            this.comboBox1.TabIndex = 39;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.Location = new System.Drawing.Point(11, 13);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(79, 16);
-            this.label12.TabIndex = 13;
-            this.label12.Text = "Controller:";
-            // 
             // label13
             // 
             this.label13.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
@@ -536,7 +494,6 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(560, 513);
-            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
@@ -544,9 +501,7 @@
             this.Controls.Add(this.label11);
             this.Controls.Add(this.numericUpDown3);
             this.Controls.Add(this.numericUpDown2);
-            this.Controls.Add(this.last_adj_ms_label);
             this.Controls.Add(this.prev_adj_r_label);
-            this.Controls.Add(this.deltaT_label);
             this.Controls.Add(this.adj_dir_label);
             this.Controls.Add(this.prev_adj_label);
             this.Controls.Add(this.adj_rate_label);
@@ -563,7 +518,6 @@
             this.Controls.Add(this.label13);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.label12);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.modeSelect_Box);
             this.Controls.Add(this.outByte2);
@@ -629,9 +583,7 @@
         private System.Windows.Forms.Label adj_rate_label;
         private System.Windows.Forms.Label prev_adj_label;
         private System.Windows.Forms.Label adj_dir_label;
-        private System.Windows.Forms.Label deltaT_label;
         private System.Windows.Forms.Label prev_adj_r_label;
-        private System.Windows.Forms.Label last_adj_ms_label;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.NumericUpDown numericUpDown2;
         private System.Windows.Forms.NumericUpDown numericUpDown3;
@@ -640,8 +592,6 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.PictureBox pictureBox3;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label13;
     }
 }

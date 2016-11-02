@@ -49,9 +49,16 @@ namespace BluetoothGUISample
         const byte ZERO = 0;
 
         // used to add items to the dropdown menu
-        private enum modes { CLOCKWISE, COUNTERCLOCKWISE, REVERSE_CIRCLE, SQUIGGLE, MANUAL, STOP } // operation modes
-        private enum controllers { PID_BangBang, PID_2 }
 
+        private const int CLOCKWISE = 0;
+        private const int COUNTERCLOCKWISE = 1;
+        private const int REVERSE_CIRCLE = 2;
+        private const int SQUIGGLE = 3;
+        private const int MANUAL = 4;
+        private const int STOP = 5;
+
+
+        private enum modes { CLOCKWISE, COUNTERCLOCKWISE, REVERSE_CIRCLE, SQUIGGLE, MANUAL, STOP } // operation modes
 
 
         // used to tell if the vehicle should be moving or stopped
@@ -70,26 +77,13 @@ namespace BluetoothGUISample
         // StopWatch 
         private Stopwatch stopwatch;
         
-
-
-        private enum OpStates // finite state machine states
-        {
-            STOPPED,
-            STRAIGHT,
-            ADJUSTING
-        }
-
-        // 
-        OpStates state;
-        OpStates prev_state;
         public Form1()
         {
             // Initialize required for form controls.
             InitializeComponent();
 
             // initialise finite state machine
-            state = OpStates.STOPPED;
-            prev_state = state;
+            
             // initialise stopwatch
             stopwatch = new Stopwatch();
             stopwatch.Reset();
@@ -100,12 +94,12 @@ namespace BluetoothGUISample
             numericUpDown2.Value = (decimal)I_T;
             numericUpDown3.Value = (decimal)D_T;
 
+            // initialise the robot with a "not running" state
             is_running = false;
 
+            // operating mode combo box initalisation
             modeSelect_Box.DataSource = Enum.GetValues(typeof(modes));
-            comboBox1.DataSource = Enum.GetValues(typeof(controllers));
             modeSelect_Box.SelectedIndex = 5; // set to stopped
-            comboBox1.SelectedIndex = 0;
             
             // Establish connection on the Virtual Serial Port
             if (open_serial_connection == true)
@@ -125,11 +119,9 @@ namespace BluetoothGUISample
         }
 
         
-
         // Send a four byte message to the Arduino via serial.
         private void sendIO(byte PORT, byte DATA)
         {
-            
             Outputs[0] = START;    //Set the first byte to the start value that indicates the beginning of the message.
             Outputs[1] = PORT;     //Set the second byte to represent the port where, Input 1 = 0, Input 2 = 1, Output 1 = 2 & Output 2 = 3. This could be enumerated to make writing code simpler... (see Arduino driver)
             Outputs[2] = DATA;  //Set the third byte to the value to be assigned to the port. This is only necessary for outputs, however it is best to assign a consistent value such as 0 for input ports.
@@ -181,12 +173,12 @@ namespace BluetoothGUISample
                             switch (Inputs[1])
                             {
                                 case 0: //Save the data to a variable and place in the textbox.
-                                    //statusBox.Text = "Input1";
+                                    
                                     Input1 = Inputs[2];
                                     
                                     break;
                                 case 1: //Save the data to a variable and place in the textbox. 
-                                    //statusBox.Text = "Input2";
+                                    
                                     Input2 = Inputs[2];
                                     
                                     break;
@@ -197,17 +189,13 @@ namespace BluetoothGUISample
             }
         }
 
-
+        // set motors to 127 when initialising - stopped
         int left_motor = 127;
         int right_motor = 127;
 
-
-        // time since last adjustment
-        private double deltaT_adjustment = 0.1; // ms
-        private double last_adjustment_ms = 0;
         // rate of last correction
-        private double adjustment_rate = 0; // 
-        private double previous_adjustment_rate = 0; // 
+        private double adjustment_rate = 0; // stores the last adjustment 
+        private double previous_adjustment_rate = 0; // stores the last adjustment rate
         
         // adjustment rate constant 
         private double K_T = 55;
@@ -215,12 +203,10 @@ namespace BluetoothGUISample
         private double D_T = 20;
         // error
         private int error = 1; // MAX error is 2
-        private int prev_error = 0;
+        private int prev_error = 0; 
         private int total_error = 0;
 
         private int adjustment_direction = LEFT; // adjustment direction
-        private int last_adj_direction = LEFT;
-        private int last_sensor_read = LEFT;
         private int tick = 0; // instead of a timer, for controller mode 2: a TICK is used.
         private int ticks_on_line = 0;
         private int ticks_adjusting = 0; // used to keep track of how long it's been turning for
@@ -237,12 +223,10 @@ namespace BluetoothGUISample
 
             if (!checkBox1.Checked)
                 sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
-            // sensor_readings_label.Text = String.Format("1: {0} 2: {1}", Input1, Input2);
-            int l_1 = left_sensor ^ 1;
-            int r_1 = right_sensor ^ 1;
+            
 
+            // this logic determines whether the vehicle must adjust to the left or right after coming outside of the line
             int bonus = 0;
-
             if (left_sensor == 0 && right_sensor != 0)
             {
                 bonus = 1;
@@ -253,289 +237,149 @@ namespace BluetoothGUISample
             }
 
             if (is_running)
-            {
-                switch (comboBox1.SelectedIndex)
+            {   
+                if (checkBox1.Checked) // if in manual_mode
                 {
-                    case 0: // if in controller 1 mode
-                        if (checkBox1.Checked) // if in manual_mode
-                        {
-                            bool l = force_left_sensor.Checked;
-                            bool r = force_right_sensor.Checked;
+                    bool l = force_left_sensor.Checked;
+                    bool r = force_right_sensor.Checked;
 
-                            if (l) left_sensor = 1;
-                            else left_sensor = 0;
-                            if (r) right_sensor = 1;
-                            else right_sensor = 0;
-                        }
-                        else if (operation_mode != 5) // not in stop mode
-                        {
-                            error = (l_1 - r_1) + bonus ;
-                            total_error += error;
-                        }
-                        sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
-                        // sensor_readings_label.Text = String.Format("1: {0} 2: {1}", Input1, Input2);
-
-                        /**
-                         * Tracking works like this.
-                         * Control algorithm aims to keep the inside sensor on top of the line.
-                         * When deviated: Based on the other sensor's reading it can
-                         * be determined in what direction the robot is going and how
-                         * its direction needs to be adjusted.
-                         * */
-                        int minl, minr;
-                        switch (operation_mode)
-                        {
-                            case 0: // Clockwise: Right sensor on the inside of track: right sensor stays on line
-                                // left motor speed slightly higher than right motor speed to force it to slowly
-                                // turn clockwise towards the right
-                                L_MAX = 1;
-                                R_MAX = 1;
-
-                                if ( (l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error) ) )
-                                {
-                                    // total_error = (int)(0.8*total_error);
-                                    total_error = (int)(0.8 * total_error);
-                                }
-                                adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                                minl = 80;
-                                minr = 80;
-                                
-
-                                left_motor = (int)(L_MAX * 255 - adjustment_rate);
-                                if (left_motor < minl) left_motor = minl;
-                                right_motor = (int)(R_MAX * 255 + adjustment_rate);
-                                if (right_motor < minr) right_motor = minr;
-
-
-
-                                break;
-
-
-                            case 1: // CCW: Left sensor on the inside of track, keep line under that
-                                    // left motor speed slightly higher than right motor speed to force it to slowly
-                                    // turn clockwise towards the right
-                                L_MAX = 0.9;
-                                R_MAX = 1;
-
-                                if ((l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
-                                {
-                                    // total_error = (int)(0.8*total_error);
-                                    total_error = (int)(0.8 * total_error);
-                                }
-                                adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                                minl = 80;
-                                minr = 80;
-
-
-                                left_motor = (int)(L_MAX * 255 - adjustment_rate);
-                                if (left_motor < minl) left_motor = minl;
-                                right_motor = (int)(R_MAX * 255 + adjustment_rate);
-                                if (right_motor < minr) right_motor = minr;
-
-                                break;
-
-                            case 2: //  reverese CIRCLE
-                                    // swap left and right
-                                    // swap PWM
-                                    // instead of outputting MAX*PWM output (1-MAX)*PWM
-
-                                L_MAX = 0.6;
-                                R_MAX = 0.6;
-
-                                if ((l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
-                                {
-                                    // total_error = (int)(0.8*total_error);
-                                    total_error = (int)(0.8 * total_error);
-                                }
-                                adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                                minl = 255 - 80;
-                                minr = 255 - 80;
-
-
-                                left_motor = 255 - (int)(L_MAX * 255 - adjustment_rate);
-                                if (left_motor > minl) left_motor = minl;
-                                right_motor = 255 - (int)(R_MAX * 255 + adjustment_rate);
-                                if (right_motor > minr) right_motor = minr;
-                                break;
-
-
-                            case 3: // Squiggle
-                                    // left motor speed slightly higher than right motor speed to force it to slowly
-                                    // turn clockwise towards the right
-                                L_MAX = 0.75;
-                                R_MAX = 0.75;
-
-                                if ((l_1 == 1 && r_1 == 1) || (Math.Sign(error) != Math.Sign(prev_error)))
-                                {
-                                    // total_error = (int)(0.8*total_error);
-                                    total_error = (int)(0.8 * total_error);
-                                }
-                                adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                                minl = 80;
-                                minr = 80;
-
-
-                                left_motor = ((int)(L_MAX*255 - adjustment_rate));
-                                if (left_motor < minl) left_motor = minl;
-                                right_motor = ((int)(L_MAX*255 + adjustment_rate));
-                                if (right_motor < minr) right_motor = minr;
-
-                                
-
-                                break;
-
-                            case 4: // manual
-                                left_motor = (byte)outByte1.Value;
-                                right_motor = (byte)outByte2.Value;
-                                break;
-                            case 5:
-                                left_motor = 127;
-                                right_motor = 127;
-
-                                break;
-                            default:
-                                Console.WriteLine(String.Format("Error. Operation mode invalid: {0}\n", operation_mode));
-                                break;
-                        }
-
-                        // GUI Update
-                        deltaT_label.Text = "deltaT:" + deltaT_adjustment.ToString();
-                        last_adj_ms_label.Text = "Last Adjustment ms: + " + last_adjustment_ms.ToString();
-                        adj_dir_label.Text = "Total Error: " + total_error.ToString();
-                        adj_rate_label.Text = "Adj rate: " + adjustment_rate.ToString();
-                        prev_adj_label.Text = "Error: " + error.ToString();
-                        prev_adj_r_label.Text = "Prev error:" + previous_adjustment_rate.ToString();
-
-                        prev_error = error;
-                        break;
-
-////////////////////// CONTROLLER 2
-                    /**
-                     * Operation mode of this controller involves setting up the robot 
-                     * with the left sensor central and the right sensor offset to the right.
-                     * The controller attempts to keep the sensor on the line at all times.
-                     * */
-
-                    case 1:
-                        // instead of using timers, a "tick" is used. every time the timer loops, tick is incremented by 1
-                        switch (operation_mode)
-                        {
-                            case 0: // clockwise
-                            case 1: // ccw 
-                            case 3: // squiggle
-                                if (checkBox1.Checked)
-                                {
-                                    bool l = force_left_sensor.Checked;
-                                    bool r = force_right_sensor.Checked;
-
-                                    
-
-                                    l_1 = (l) ? 1 : 0;
-                                    r_1 = (r) ? 1 : 0;
-
-                                    left_sensor = l_1;
-                                    right_sensor = r_1;
-
-                                    sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
-                                }
-                                switch (state)
-                                {
-                                    case OpStates.STOPPED:
-                                        if (is_running)
-                                        {
-                                            tick = 0;
-                                            state = OpStates.STRAIGHT;
-                                        }
-                                        break;
-                                    case OpStates.STRAIGHT:
-                                        tick++;
-                                        left_motor = (int)L_MAX * 255 - (int)adjustment_rate;
-                                        right_motor = (int)R_MAX * 255 + (int)adjustment_rate;
-
-                                        
-
-                                        if (l_1 != 1 || r_1 == 1) // if left sensor is not on the line, 
-                                        {
-                                            ticks_adjusting = 0; // resets for how long it's been adjusting for
-                                            state = OpStates.ADJUSTING; // state now is adjusting
-                                            if (r_1 == 1)
-                                            {
-                                                adjustment_direction = LEFT;
-                                            }
-                                            else
-                                            { 
-                                                adjustment_direction = RIGHT;
-                                            }   
-                                        }
-
-                                        ticks_on_line++; // keeps track for how long the robot was on the proper line ( moving forwards )
-                                        
-                                        break;
-                                    case OpStates.ADJUSTING:
-                                        tick++; // increment tick
-                                        ticks_adjusting++; // increment for how long it's been adjusting
-
-                                        // becomes negative or positive depending on whether the cart must turn left or right
-                                        adjustment_rate = adjustment_direction * (K_T + D_T / ( (ticks_on_line == 0 ? 1 : ticks_on_line)) + I_T * (ticks_adjusting)); // golden formula
-                                        left_motor = (int)(L_MAX * 255 - adjustment_rate);
-                                        right_motor = (int)(R_MAX * 255 + adjustment_rate);
-
-                                        if (left_motor < 127) left_motor = 127;
-                                        if (left_motor > 255) left_motor = 255;
-                                        if (right_motor < 127) right_motor = 127;
-                                        if (right_motor > 255) right_motor = 255;
-
-                                        if (l_1 == 1 && r_1 == 0)
-                                        {
-                                            state = OpStates.STRAIGHT;
-                                            ticks_on_line = 0;
-                                        }
-                                        if (r_1 == 1)
-                                        {
-                                            adjustment_direction = LEFT;
-                                        }
-
-                                        break;
-                                }
-                                break;
-                            
-                            case 2: // reverse
-                                switch (state)
-                                {
-                                    case OpStates.STOPPED:
-                                        break;
-                                    case OpStates.STRAIGHT:
-                                        break;
-                                    case OpStates.ADJUSTING:
-                                        break;
-                                }
-                                break;
-                            
-                            case 4: // manual
-                                left_motor = (byte)outByte1.Value;
-                                right_motor = (byte)outByte2.Value;
-                                break;
-                            case 5:
-                                left_motor = 127;
-                                right_motor = 127;
-
-                                break;
-                            default:
-                                Console.WriteLine(String.Format("Error. Operation mode invalid: {0}\n", operation_mode));
-                                break;
-                        }
-
-                        deltaT_label.Text = "Ticks: " + tick.ToString();
-                        last_adj_ms_label.Text = "Ticks Adjustment: + " + ticks_adjusting.ToString();
-                        adj_dir_label.Text = "Ticks on line: " + ticks_on_line.ToString();
-                        adj_rate_label.Text = "Adj rate: " + adjustment_rate.ToString();
-                        prev_adj_label.Text = "Adj Direction: " + ((adjustment_direction == LEFT) ? "Left" : "Right");
-                        prev_adj_r_label.Text = "State: " + state.ToString();
-
-                        break;
-
-
+                    if (l) left_sensor = 1;
+                    else left_sensor = 0;
+                    if (r) right_sensor = 1;
+                    else right_sensor = 0;
                 }
+                else if (operation_mode != 5) // not in stop mode
+                {
+                    error = (right_sensor - left_sensor) + bonus ;
+                    total_error += error;
+                }
+                sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
+                
+
+               /**
+                *
+                * PID algorithm that attempts to keep the line on the inside of the sensors.
+                **/
+                int minl, minr;
+                switch (operation_mode)
+                {
+                    case CLOCKWISE: // Clockwise: Right sensor on the inside of track: right sensor stays on line
+                        // left motor speed slightly higher than right motor speed to force it to slowly
+                        // turn clockwise towards the right
+                        L_MAX = 1;
+                        R_MAX = 1;
+
+                        // start reducing error if line was crossed to prevent the integral component to cause spinning
+                        if ( (left_sensor == 0 && right_sensor == 0) || (Math.Sign(error) != Math.Sign(prev_error) ) )
+                        {
+                            // total_error = (int)(0.8*total_error);
+                            total_error = (int)(0.8 * total_error);
+                        }
+                        adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                        minl = 80;
+                        minr = 80;
+                                
+
+                        left_motor = (int)(L_MAX * 255 - adjustment_rate);
+                        if (left_motor < minl) left_motor = minl;
+                        right_motor = (int)(R_MAX * 255 + adjustment_rate);
+                        if (right_motor < minr) right_motor = minr;
+                        break;
+
+
+                    case COUNTERCLOCKWISE: // CCW: Left sensor on the inside of track, keep line under that
+                            // left motor speed slightly higher than right motor speed to force it to slowly
+                            // turn clockwise towards the right
+                        L_MAX = 0.9;
+                        R_MAX = 1;
+                        // start reducing error if line was crossed to prevent the integral component to cause spinning
+                        if ((left_sensor == 0 && right_sensor == 0) || (Math.Sign(error) != Math.Sign(prev_error)))
+                        {
+                            // total_error = (int)(0.8*total_error);
+                            total_error = (int)(0.8 * total_error);
+                        }
+                        adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                        minl = 80;
+                        minr = 80;
+
+
+                        left_motor = (int)(L_MAX * 255 - adjustment_rate);
+                        if (left_motor < minl) left_motor = minl;
+                        right_motor = (int)(R_MAX * 255 + adjustment_rate);
+                        if (right_motor < minr) right_motor = minr;
+
+                        break;
+
+                    case REVERSE_CIRCLE: //  reverese CIRCLE
+                            // swap left and right
+                            // swap PWM
+                            // instead of outputting MAX*PWM output (1-MAX)*PWM
+
+                        L_MAX = 0.6;
+                        R_MAX = 0.6;
+                        // start reducing error if line was crossed to prevent the integral component to cause spinning
+                        if ((left_sensor == 0 && right_sensor == 0) || (Math.Sign(error) != Math.Sign(prev_error)))
+                        {
+                            // total_error = (int)(0.8*total_error);
+                            total_error = (int)(0.8 * total_error);
+                        }
+                        adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                        minl = 255 - 80;
+                        minr = 255 - 80;
+
+
+                        left_motor = 255 - (int)(L_MAX * 255 - adjustment_rate);
+                        if (left_motor > minl) left_motor = minl;
+                        right_motor = 255 - (int)(R_MAX * 255 + adjustment_rate);
+                        if (right_motor > minr) right_motor = minr;
+                        break;
+
+
+                    case SQUIGGLE: // Squiggle
+                            // left motor speed slightly higher than right motor speed to force it to slowly
+                            // turn clockwise towards the right
+                        L_MAX = 0.75;
+                        R_MAX = 0.75;
+                        // start reducing error if line was crossed to prevent the integral component to cause spinning
+                        if ((left_sensor == 0 && right_sensor == 0) || (Math.Sign(error) != Math.Sign(prev_error)))
+                        {
+                            // total_error = (int)(0.8*total_error);
+                            total_error = (int)(0.8 * total_error);
+                        }
+                        adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                        minl = 80;
+                        minr = 80;
+
+                        left_motor = ((int)(L_MAX*255 - adjustment_rate));
+                        if (left_motor < minl) left_motor = minl;
+                        right_motor = ((int)(L_MAX*255 + adjustment_rate));
+                        if (right_motor < minr) right_motor = minr;
+                        break;
+
+                    case MANUAL: // manual
+                        left_motor = (byte)outByte1.Value;
+                        right_motor = (byte)outByte2.Value;
+                        break;
+                    case STOP:
+                        left_motor = 127;
+                        right_motor = 127;
+
+                        break;
+                    default:
+                        Console.WriteLine(String.Format("Error. Operation mode invalid: {0}\n", operation_mode));
+                        break;
+                }
+
+                // GUI Update
+                
+                adj_dir_label.Text = "Total Error: " + total_error.ToString();
+                adj_rate_label.Text = "Adj rate: " + adjustment_rate.ToString();
+                prev_adj_label.Text = "Error: " + error.ToString();
+                prev_adj_r_label.Text = "Prev error:" + previous_adjustment_rate.ToString();
+
+                prev_error = error;
+                
+                
             }
             else
             {
@@ -546,10 +390,7 @@ namespace BluetoothGUISample
             if (left_motor > 255) left_motor = 255;
             if (right_motor > 255) right_motor = 255;
             if (left_motor < 0) left_motor = 0;
-            if (right_motor < 0) right_motor = 0;
-
-
-                    
+            if (right_motor < 0) right_motor = 0; 
 
             outByte1.Value = left_motor;
             outByte2.Value = right_motor;
@@ -557,8 +398,7 @@ namespace BluetoothGUISample
 
             sendIO(2, (byte)left_motor);
             sendIO(3, (byte)right_motor);
-            // read sensors
-
+            
         }
 
 
@@ -690,10 +530,10 @@ namespace BluetoothGUISample
 
             switch (index)
             {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
+                case CLOCKWISE:
+                case COUNTERCLOCKWISE:
+                case REVERSE_CIRCLE:
+                case SQUIGGLE:
                     running_label.Text = "Ready";
                     outByte1.Enabled = false;
                     outByte2.Enabled = false;
@@ -701,7 +541,7 @@ namespace BluetoothGUISample
                     OutputBox2.Enabled = false;
                     running_label.ForeColor = Color.Green;
                     break;
-                case 4:
+                case MANUAL:
                     is_running = true;
                     running_label.Text = "Manual Ctrl";
                     if (checkBox1.Checked)
