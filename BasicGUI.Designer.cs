@@ -32,11 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.serial = new System.IO.Ports.SerialPort(this.components);
             this.getIOtimer = new System.Windows.Forms.Timer(this.components);
-            this.InputBox1 = new System.Windows.Forms.TextBox();
             this.OutputBox1 = new System.Windows.Forms.NumericUpDown();
-            this.Get1 = new System.Windows.Forms.Button();
-            this.Get2 = new System.Windows.Forms.Button();
-            this.InputBox2 = new System.Windows.Forms.TextBox();
             this.OutputBox2 = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -63,13 +59,17 @@
             this.adj_rate_label = new System.Windows.Forms.Label();
             this.prev_adj_label = new System.Windows.Forms.Label();
             this.adj_dir_label = new System.Windows.Forms.Label();
-            this.deltaT_label = new System.Windows.Forms.Label();
             this.prev_adj_r_label = new System.Windows.Forms.Label();
-            this.last_adj_ms_label = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
             this.label11 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.outByte1)).BeginInit();
@@ -78,26 +78,20 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.SuspendLayout();
             // 
             // serial
             // 
-            this.serial.PortName = "COM10";
+            this.serial.PortName = "COM5";
             // 
             // getIOtimer
             // 
             this.getIOtimer.Enabled = true;
             this.getIOtimer.Interval = 10;
             this.getIOtimer.Tick += new System.EventHandler(this.getIOtimer_Tick);
-            // 
-            // InputBox1
-            // 
-            this.InputBox1.Location = new System.Drawing.Point(309, 36);
-            this.InputBox1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.InputBox1.Name = "InputBox1";
-            this.InputBox1.Size = new System.Drawing.Size(60, 20);
-            this.InputBox1.TabIndex = 0;
-            this.InputBox1.Text = "0";
             // 
             // OutputBox1
             // 
@@ -119,37 +113,6 @@
             0,
             0});
             this.OutputBox1.ValueChanged += new System.EventHandler(this.OutputBox1_ValueChanged);
-            // 
-            // Get1
-            // 
-            this.Get1.Location = new System.Drawing.Point(379, 36);
-            this.Get1.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.Get1.Name = "Get1";
-            this.Get1.Size = new System.Drawing.Size(74, 23);
-            this.Get1.TabIndex = 4;
-            this.Get1.Text = "Input 1";
-            this.Get1.UseVisualStyleBackColor = true;
-            this.Get1.Click += new System.EventHandler(this.Get1_Click);
-            // 
-            // Get2
-            // 
-            this.Get2.Location = new System.Drawing.Point(379, 7);
-            this.Get2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.Get2.Name = "Get2";
-            this.Get2.Size = new System.Drawing.Size(74, 23);
-            this.Get2.TabIndex = 4;
-            this.Get2.Text = "Input 2";
-            this.Get2.UseVisualStyleBackColor = true;
-            this.Get2.Click += new System.EventHandler(this.Get2_Click);
-            // 
-            // InputBox2
-            // 
-            this.InputBox2.Location = new System.Drawing.Point(309, 10);
-            this.InputBox2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.InputBox2.Name = "InputBox2";
-            this.InputBox2.Size = new System.Drawing.Size(60, 20);
-            this.InputBox2.TabIndex = 0;
-            this.InputBox2.Text = "0";
             // 
             // OutputBox2
             // 
@@ -176,12 +139,12 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(115, 12);
+            this.label1.Location = new System.Drawing.Point(195, 9);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(127, 20);
             this.label1.TabIndex = 6;
-            this.label1.Text = "Bambi GUI 1.0";
+            this.label1.Text = "Bambi GUI 2.0";
             // 
             // label4
             // 
@@ -204,6 +167,7 @@
             // mainLoop
             // 
             this.mainLoop.Enabled = true;
+            this.mainLoop.Interval = 25;
             this.mainLoop.Tick += new System.EventHandler(this.sendLoopTimer_Tick);
             // 
             // label6
@@ -278,7 +242,7 @@
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(43, 57);
+            this.label8.Location = new System.Drawing.Point(40, 56);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(123, 16);
             this.label8.TabIndex = 13;
@@ -287,11 +251,10 @@
             // label2
             // 
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label2.Location = new System.Drawing.Point(12, 273);
+            this.label2.Location = new System.Drawing.Point(12, 277);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(536, 58);
+            this.label2.Size = new System.Drawing.Size(536, 10);
             this.label2.TabIndex = 14;
-            this.label2.Text = "asasdf";
             // 
             // label3
             // 
@@ -305,7 +268,7 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.connectionMessage});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 415);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 491);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(560, 22);
             this.statusStrip1.TabIndex = 16;
@@ -382,7 +345,6 @@
             // numericUpDown1
             // 
             this.numericUpDown1.DecimalPlaces = 2;
-            this.numericUpDown1.Enabled = false;
             this.numericUpDown1.Location = new System.Drawing.Point(132, 188);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             500,
@@ -430,15 +392,6 @@
             this.adj_dir_label.TabIndex = 27;
             this.adj_dir_label.Text = "Adj Direction:";
             // 
-            // deltaT_label
-            // 
-            this.deltaT_label.AutoSize = true;
-            this.deltaT_label.Location = new System.Drawing.Point(251, 194);
-            this.deltaT_label.Name = "deltaT_label";
-            this.deltaT_label.Size = new System.Drawing.Size(40, 13);
-            this.deltaT_label.TabIndex = 29;
-            this.deltaT_label.Text = "deltaT:";
-            // 
             // prev_adj_r_label
             // 
             this.prev_adj_r_label.AutoSize = true;
@@ -447,15 +400,6 @@
             this.prev_adj_r_label.Size = new System.Drawing.Size(76, 13);
             this.prev_adj_r_label.TabIndex = 30;
             this.prev_adj_r_label.Text = "Prev Adj Rate:";
-            // 
-            // last_adj_ms_label
-            // 
-            this.last_adj_ms_label.AutoSize = true;
-            this.last_adj_ms_label.Location = new System.Drawing.Point(328, 194);
-            this.last_adj_ms_label.Name = "last_adj_ms_label";
-            this.last_adj_ms_label.Size = new System.Drawing.Size(64, 13);
-            this.last_adj_ms_label.TabIndex = 31;
-            this.last_adj_ms_label.Text = "Last Adj ms:";
             // 
             // label10
             // 
@@ -468,8 +412,7 @@
             // 
             // numericUpDown2
             // 
-            this.numericUpDown2.DecimalPlaces = 1;
-            this.numericUpDown2.Enabled = false;
+            this.numericUpDown2.DecimalPlaces = 2;
             this.numericUpDown2.Location = new System.Drawing.Point(132, 218);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             500,
@@ -484,7 +427,6 @@
             // numericUpDown3
             // 
             this.numericUpDown3.DecimalPlaces = 2;
-            this.numericUpDown3.Enabled = false;
             this.numericUpDown3.Location = new System.Drawing.Point(132, 245);
             this.numericUpDown3.Maximum = new decimal(new int[] {
             500,
@@ -498,23 +440,80 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(102, 245);
+            this.label11.Location = new System.Drawing.Point(98, 245);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(28, 13);
             this.label11.TabIndex = 34;
             this.label11.Text = "D_T";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(458, 99);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 35;
+            this.button1.Text = "Reset";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.BackColor = System.Drawing.Color.Black;
+            this.pictureBox1.Location = new System.Drawing.Point(499, 418);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(34, 50);
+            this.pictureBox1.TabIndex = 36;
+            this.pictureBox1.TabStop = false;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.BackColor = System.Drawing.Color.Black;
+            this.pictureBox2.Location = new System.Drawing.Point(406, 418);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(37, 50);
+            this.pictureBox2.TabIndex = 37;
+            this.pictureBox2.TabStop = false;
+            // 
+            // pictureBox3
+            // 
+            this.pictureBox3.BackColor = System.Drawing.Color.Pink;
+            this.pictureBox3.Location = new System.Drawing.Point(433, 335);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(76, 110);
+            this.pictureBox3.TabIndex = 38;
+            this.pictureBox3.TabStop = false;
+            // 
+            // label13
+            // 
+            this.label13.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label13.Location = new System.Drawing.Point(12, 43);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(536, 1);
+            this.label13.TabIndex = 15;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(255, 202);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(40, 13);
+            this.label12.TabIndex = 39;
+            this.label12.Text = "Bonus:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(560, 437);
+            this.ClientSize = new System.Drawing.Size(560, 513);
+            this.Controls.Add(this.label12);
+            this.Controls.Add(this.pictureBox3);
+            this.Controls.Add(this.pictureBox2);
+            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.numericUpDown3);
             this.Controls.Add(this.numericUpDown2);
-            this.Controls.Add(this.last_adj_ms_label);
             this.Controls.Add(this.prev_adj_r_label);
-            this.Controls.Add(this.deltaT_label);
             this.Controls.Add(this.adj_dir_label);
             this.Controls.Add(this.prev_adj_label);
             this.Controls.Add(this.adj_rate_label);
@@ -528,6 +527,7 @@
             this.Controls.Add(this.state_label);
             this.Controls.Add(this.running_label);
             this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.label13);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label8);
@@ -539,14 +539,11 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.Get2);
-            this.Controls.Add(this.Get1);
             this.Controls.Add(this.OutputBox2);
             this.Controls.Add(this.OutputBox1);
-            this.Controls.Add(this.InputBox2);
-            this.Controls.Add(this.InputBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.Name = "Form1";
             this.Text = "Bambi GUI 1.0";
@@ -559,6 +556,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -567,12 +567,8 @@
         #endregion
 
         private System.Windows.Forms.Timer getIOtimer;
-        private System.Windows.Forms.TextBox InputBox1;
         private System.Windows.Forms.NumericUpDown OutputBox1;
         private System.IO.Ports.SerialPort serial;
-        private System.Windows.Forms.Button Get1;
-        private System.Windows.Forms.Button Get2;
-        private System.Windows.Forms.TextBox InputBox2;
         private System.Windows.Forms.NumericUpDown OutputBox2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label4;
@@ -599,13 +595,17 @@
         private System.Windows.Forms.Label adj_rate_label;
         private System.Windows.Forms.Label prev_adj_label;
         private System.Windows.Forms.Label adj_dir_label;
-        private System.Windows.Forms.Label deltaT_label;
         private System.Windows.Forms.Label prev_adj_r_label;
-        private System.Windows.Forms.Label last_adj_ms_label;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.NumericUpDown numericUpDown2;
         private System.Windows.Forms.NumericUpDown numericUpDown3;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.PictureBox pictureBox3;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label12;
     }
 }
 
