@@ -24,15 +24,12 @@ namespace BluetoothGUISample
         public const byte SENSOR1_POS = 0;  // position of sensor 1 within the INPUT BYTE
         public const byte SENSOR2_POS = 1;  // position of sensor 2 within the INPUT BYTE
 
-        public const int LEFT = -1;
+        public const int LEFT = -1; // used for direction control 
         public const int RIGHT = 1;
-
-        public const int LINE = -1;
-        public const int NO_LINE = 1;
 
         // duty_cycle_out = (b_in - K1) / K2; - bit to duty cycle
         // byte_out =  K2 * d_in + K1; - duty cycle to bit
-        public const double K1 = 1.7179, K2 = 2.3623; //       
+        public const double K1 = 1.7179, K2 = 2.3623; // duty cycle to bit after regression was performed
 
         public const double DAC_MIN = 0;
         public const double DAC1_MAX = 8.0; // DAC 1 max voltage
@@ -41,7 +38,6 @@ namespace BluetoothGUISample
 
         // Declare variables to store inputs and outputs.
         bool open_serial_connection = true;
-        bool byteRead = false;
 
         int Input1 = 0;
         int Input2 = 0;
@@ -53,16 +49,14 @@ namespace BluetoothGUISample
         const byte ZERO = 0;
 
         // used to add items to the dropdown menu
-
-        private enum modes { CLOCKWISE, COUNTERCLOCKWISE, REVERSE_CIRCLE, SQUIGGLE, MANUAL, STOP }
+        private enum modes { CLOCKWISE, COUNTERCLOCKWISE, REVERSE_CIRCLE, SQUIGGLE, MANUAL, STOP } // operation modes
         private enum controllers { PID_BangBang, PID_2 }
 
 
 
         // used to tell if the vehicle should be moving or stopped
         private bool is_running = false;
-        private bool is_manual = false;
-
+        
         // stores operation mode from dropdown menu
         private int operation_mode = 4; // manual mode by default
 
@@ -718,7 +712,7 @@ namespace BluetoothGUISample
                         OutputBox2.Enabled = true;
                     }
                     running_label.ForeColor = Color.Orange;
-                    is_manual = true;
+                    
                     break;
                 default: // 
                     is_running = false;
@@ -741,7 +735,7 @@ namespace BluetoothGUISample
                     OutputBox1.Enabled = true;
                     OutputBox2.Enabled = true;
                 }
-                is_manual = true;
+                
             }
             else
             {
@@ -751,7 +745,7 @@ namespace BluetoothGUISample
                 outByte2.Enabled = false;
                 OutputBox1.Enabled = false;
                 OutputBox2.Enabled = false;
-                is_manual = false;
+                
             }
         }
 
