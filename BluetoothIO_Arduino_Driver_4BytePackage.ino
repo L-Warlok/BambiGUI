@@ -1,4 +1,4 @@
-//Curtin University
+  //Curtin University
 //Mechatronics Engineering
 //Bluetooth I/O Card - Driver Code
 
@@ -46,6 +46,7 @@ void setup() {
   DDRK |= (1<<3);
 
   PORTK = 0xFF;
+  PORTK &= ~(1<<3);
 
 }
 
@@ -94,7 +95,7 @@ void loop() {
           break;
           case OUTPUT1: //For Output 1 the value of the data byte is written to Port A.
           {
-            output1 = bitFlip(dataByte);//The value of the data byte is stored in variable output 1, this step is redundant as the value could be written directly to the port.       
+            output1 = dataByte;//The value of the data byte is stored in variable output 1, this step is redundant as the value could be written directly to the port.       
             PORTA = output1;       //However keeping the data in a variable could prove useful if further processing was done on the arduino side.
   
           } 
@@ -106,10 +107,14 @@ void loop() {
           }         
           break;
         }
-        if (PORTC == 127 && PORTA == 127)
+        if (output1 == 127 && bitFlip(output2) == 127)
+        {
           PORTK |= (1<<3);
+        }
         else
-          PORTK &= ~(1<<3);  
+        {
+          PORTK &= ~(1<<3); 
+        } 
       }
     }    
   }
