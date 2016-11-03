@@ -72,6 +72,10 @@
             this.label12 = new System.Windows.Forms.Label();
             this.l_sensorBox = new System.Windows.Forms.PictureBox();
             this.r_sensorBox = new System.Windows.Forms.PictureBox();
+            this.left_arrow = new System.Windows.Forms.PictureBox();
+            this.right_arrow = new System.Windows.Forms.PictureBox();
+            this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
+            this.label14 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.outByte1)).BeginInit();
@@ -85,6 +89,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.l_sensorBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.r_sensorBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.left_arrow)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.right_arrow)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
             this.SuspendLayout();
             // 
             // serial
@@ -171,7 +178,7 @@
             // mainLoop
             // 
             this.mainLoop.Enabled = true;
-            this.mainLoop.Interval = 25;
+            this.mainLoop.Interval = 35;
             this.mainLoop.Tick += new System.EventHandler(this.sendLoopTimer_Tick);
             // 
             // label6
@@ -349,7 +356,7 @@
             // numericUpDown1
             // 
             this.numericUpDown1.DecimalPlaces = 2;
-            this.numericUpDown1.Location = new System.Drawing.Point(132, 188);
+            this.numericUpDown1.Location = new System.Drawing.Point(170, 188);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             500,
             0,
@@ -363,7 +370,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(99, 190);
+            this.label9.Location = new System.Drawing.Point(137, 190);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(27, 13);
             this.label9.TabIndex = 24;
@@ -408,7 +415,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(99, 218);
+            this.label10.Location = new System.Drawing.Point(137, 218);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(23, 13);
             this.label10.TabIndex = 24;
@@ -417,7 +424,7 @@
             // numericUpDown2
             // 
             this.numericUpDown2.DecimalPlaces = 2;
-            this.numericUpDown2.Location = new System.Drawing.Point(132, 218);
+            this.numericUpDown2.Location = new System.Drawing.Point(170, 218);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             500,
             0,
@@ -431,7 +438,7 @@
             // numericUpDown3
             // 
             this.numericUpDown3.DecimalPlaces = 2;
-            this.numericUpDown3.Location = new System.Drawing.Point(132, 245);
+            this.numericUpDown3.Location = new System.Drawing.Point(170, 245);
             this.numericUpDown3.Maximum = new decimal(new int[] {
             500,
             0,
@@ -440,11 +447,12 @@
             this.numericUpDown3.Name = "numericUpDown3";
             this.numericUpDown3.Size = new System.Drawing.Size(60, 20);
             this.numericUpDown3.TabIndex = 33;
+            this.numericUpDown3.ValueChanged += new System.EventHandler(this.numericUpDown3_ValueChanged);
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(98, 245);
+            this.label11.Location = new System.Drawing.Point(136, 245);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(28, 13);
             this.label11.TabIndex = 34;
@@ -463,7 +471,7 @@
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.Black;
-            this.pictureBox1.Location = new System.Drawing.Point(499, 418);
+            this.pictureBox1.Location = new System.Drawing.Point(385, 416);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(34, 50);
             this.pictureBox1.TabIndex = 36;
@@ -472,7 +480,7 @@
             // pictureBox2
             // 
             this.pictureBox2.BackColor = System.Drawing.Color.Black;
-            this.pictureBox2.Location = new System.Drawing.Point(406, 418);
+            this.pictureBox2.Location = new System.Drawing.Point(292, 416);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(37, 50);
             this.pictureBox2.TabIndex = 37;
@@ -481,7 +489,7 @@
             // pictureBox3
             // 
             this.pictureBox3.BackColor = System.Drawing.Color.Pink;
-            this.pictureBox3.Location = new System.Drawing.Point(433, 335);
+            this.pictureBox3.Location = new System.Drawing.Point(319, 333);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(76, 110);
             this.pictureBox3.TabIndex = 38;
@@ -506,7 +514,7 @@
             // 
             // l_sensorBox
             // 
-            this.l_sensorBox.Location = new System.Drawing.Point(449, 364);
+            this.l_sensorBox.Location = new System.Drawing.Point(335, 362);
             this.l_sensorBox.Name = "l_sensorBox";
             this.l_sensorBox.Size = new System.Drawing.Size(22, 26);
             this.l_sensorBox.TabIndex = 40;
@@ -514,17 +522,69 @@
             // 
             // r_sensorBox
             // 
-            this.r_sensorBox.Location = new System.Drawing.Point(477, 364);
+            this.r_sensorBox.Location = new System.Drawing.Point(363, 362);
             this.r_sensorBox.Name = "r_sensorBox";
             this.r_sensorBox.Size = new System.Drawing.Size(22, 26);
             this.r_sensorBox.TabIndex = 41;
             this.r_sensorBox.TabStop = false;
+            // 
+            // left_arrow
+            // 
+            this.left_arrow.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("left_arrow.BackgroundImage")));
+            this.left_arrow.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.left_arrow.Location = new System.Drawing.Point(217, 290);
+            this.left_arrow.Name = "left_arrow";
+            this.left_arrow.Size = new System.Drawing.Size(100, 50);
+            this.left_arrow.TabIndex = 42;
+            this.left_arrow.TabStop = false;
+            // 
+            // right_arrow
+            // 
+            this.right_arrow.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("right_arrow.BackgroundImage")));
+            this.right_arrow.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.right_arrow.Location = new System.Drawing.Point(399, 290);
+            this.right_arrow.Name = "right_arrow";
+            this.right_arrow.Size = new System.Drawing.Size(100, 50);
+            this.right_arrow.TabIndex = 42;
+            this.right_arrow.TabStop = false;
+            // 
+            // numericUpDown4
+            // 
+            this.numericUpDown4.DecimalPlaces = 2;
+            this.numericUpDown4.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.numericUpDown4.Location = new System.Drawing.Point(58, 188);
+            this.numericUpDown4.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDown4.Name = "numericUpDown4";
+            this.numericUpDown4.Size = new System.Drawing.Size(50, 20);
+            this.numericUpDown4.TabIndex = 43;
+            this.numericUpDown4.ValueChanged += new System.EventHandler(this.numericUpDown4_ValueChanged);
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(40, 211);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(63, 13);
+            this.label14.TabIndex = 44;
+            this.label14.Text = "Error Decay";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(560, 513);
+            this.Controls.Add(this.label14);
+            this.Controls.Add(this.numericUpDown4);
+            this.Controls.Add(this.right_arrow);
+            this.Controls.Add(this.left_arrow);
             this.Controls.Add(this.r_sensorBox);
             this.Controls.Add(this.l_sensorBox);
             this.Controls.Add(this.label12);
@@ -583,6 +643,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.l_sensorBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.r_sensorBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.left_arrow)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.right_arrow)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -632,6 +695,10 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.PictureBox l_sensorBox;
         private System.Windows.Forms.PictureBox r_sensorBox;
+        private System.Windows.Forms.PictureBox left_arrow;
+        private System.Windows.Forms.PictureBox right_arrow;
+        private System.Windows.Forms.NumericUpDown numericUpDown4;
+        private System.Windows.Forms.Label label14;
     }
 }
 

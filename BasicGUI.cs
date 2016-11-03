@@ -27,23 +27,21 @@ namespace BluetoothGUISample
         public const int LEFT = -1; // used for direction control 
         public const int RIGHT = 1;
 
-        // duty_cycle_out = (b_in - K1) / K2; - bit to duty cycle
-        // byte_out =  K2 * d_in + K1; - duty cycle to bit
         public const double K1 = 1.7179, K2 = 2.3623; // duty cycle to bit after regression was performed
 
         public const double DAC_MIN = 0;
         public const double DAC1_MAX = 8.0; // DAC 1 max voltage
         public const double DAC2_MAX = 8.0; // dac 2 max voltage
-                                            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         // Declare variables to store inputs and outputs.
         bool open_serial_connection = true;
 
 
-        // K P and 
-        private double K_T = 85;
-        private double I_T = 0.5;
-        private double D_T = 1;
+        //  P and I and D
+        private double P = 85;
+        private double I = 0.5;
+        private double D = 1;
 
         int Input1 = 0;
         int Input2 = 0;
@@ -73,36 +71,35 @@ namespace BluetoothGUISample
         // stores operation mode from dropdown menu
         private int operation_mode = 4; // manual mode by default
 
-        // date time
-        float start_time;
 
         // Motor max speeds
         private double L_MAX = 1; // 80% 
         private double R_MAX = 1; // 80%
 
-        // StopWatch 
-        private Stopwatch stopwatch;
+        // error decay rate
+        private double ERROR_DECAY = 0.8; // 80%
+
         
         public Form1()
         {
             // Initialize required for form controls.
-            InitializeComponent();
-
-            // initialise finite state machine
-            
-            // initialise stopwatch
-            stopwatch = new Stopwatch();
-            stopwatch.Reset();
-            stopwatch.Start();
-            start_time = stopwatch.ElapsedMilliseconds;
+            InitializeComponent();   
 
             // initialise sensor boxes
             l_sensorBox.BackColor = Color.Black;
             r_sensorBox.BackColor = Color.Black;
 
-            numericUpDown1.Value = (decimal)K_T;
-            numericUpDown2.Value = (decimal)I_T;
-            numericUpDown3.Value = (decimal)D_T;
+            // set the scrollBoxes to contain the parameter values
+            numericUpDown1.Value = (decimal)P;
+            numericUpDown2.Value = (decimal)I;
+            numericUpDown3.Value = (decimal)D;
+
+            // hide direction arrows
+            left_arrow.Visible = false;
+            right_arrow.Visible = false;
+
+            // initialise Error Decay scrollBox
+            numericUpDown4.Value = (decimal)ERROR_DECAY;
 
             // initialise the robot with a "not running" state
             is_running = false;
@@ -183,7 +180,6 @@ namespace BluetoothGUISample
                             switch (Inputs[1])
                             {
                                 case 0: //Save the data to a variable and place in the textbox.
-                                    
                                     Input1 = Inputs[2];
                                     break;
                                 case 1: //Save the data to a variable and place in the textbox. 
@@ -202,9 +198,7 @@ namespace BluetoothGUISample
 
         // rate of last correction
         private double adjustment_rate = 0; // stores the last adjustment 
-        private double previous_adjustment_rate = 0; // stores the last adjustment rate
-
-
+        private double previous_adjustment_rate = 0; // stores the last adjustment 
 
         // error
         private int error = 1; // MAX error is 2
@@ -218,9 +212,11 @@ namespace BluetoothGUISample
             // bit mask the Input byte. bit 0 is left sensor. bit 1 is right sensor.
             sendIO(1, ZERO);  // The value 1 indicates Input 2, ZERO maintains a consistent value for the message output.
 
+            // bit masking to obtain individual left and right sensor readings
             int left_sensor = ((1 << SENSOR1_POS) & Input2);
             int right_sensor = ((1 << SENSOR2_POS) & Input2) >> SENSOR2_POS;
 
+            // if manual override box is NOT checked update the values with the sensor readings from Serial input
             if (!checkBox1.Checked)
             {
                 sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
@@ -228,7 +224,6 @@ namespace BluetoothGUISample
 
 
             // this logic determines whether the vehicle must adjust to the left or right after coming outside of the line
-            
             if (left_sensor == 0 && right_sensor != 0)
             {
                 bonus = 1;
@@ -242,19 +237,21 @@ namespace BluetoothGUISample
             {   
                 if (checkBox1.Checked) // if in manual_mode
                 {
+                    // read checkBoxes and store states
                     bool l = force_left_sensor.Checked;
                     bool r = force_right_sensor.Checked;
 
-                    if (l) left_sensor = 1;
-                    else left_sensor = 0;
-                    if (r) right_sensor = 1;
-                    else right_sensor = 0;
+                    // if boolean value is true set sensor value to 1, else set to 0.
+                    left_sensor = (l) ? 1 : 0;
+                    right_sensor = (r) ? 1 : 0;
+                    
                 }
-                if (operation_mode != STOP) // not in stop mode
+                if (operation_mode != STOP && operation_mode != MANUAL) // not in stop mode
                 {
-                    error = (right_sensor - left_sensor) ;
-                    total_error += error + bonus;
+                    error = (right_sensor - left_sensor); // compute error
+                    total_error += error + bonus; // compute toal error
                 }
+                // update sensor readings 
                 sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
                 
 
@@ -262,37 +259,44 @@ namespace BluetoothGUISample
                 *
                 * PID algorithm that attempts to keep the line on the inside of the sensors.
                 **/
-                int minl, minr;
-                switch (operation_mode)
+
+                // stores the minimum values for left and right motor
+                int minl, minr; 
+                switch (operation_mode) // operation mode logic
                 {
                     case CLOCKWISE: // Clockwise:
                     case SQUIGGLE: // Squiggle
                     case COUNTERCLOCKWISE: // CCW: 
+                        // left and right motors - MAX is at 100%
                         L_MAX = 1;
                         R_MAX = 1;
 
                         // start reducing error if line was crossed to prevent the integral component to cause spinning
                         if ( (left_sensor == 0 && right_sensor == 0 ) || (Math.Sign(error) != Math.Sign(prev_error) ) )
                         {
-                            
-                            total_error = (int)(0.6 * total_error);
+                            total_error = (int)(ERROR_DECAY * total_error);
                             bonus = 0;
                         }
-                        adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
+                        // compute adjustment rate - PID equation
+                        adjustment_rate = error * P + (error - prev_error) * D + total_error * I;
+
+                        // minimum values of left and right motors is 60 - which is a very slow reverse speed
                         minl = 60;
                         minr = 60;
                                 
+                        // set left and right motor speed based on the adjustment rate
+                        left_motor = (int)(L_MAX * 255 - adjustment_rate);
+                        right_motor = (int)(R_MAX * 255 + adjustment_rate);
 
-                        left_motor = (int)(L_MAX * 255 + adjustment_rate);
+                        // if motor speed is less than the specified minimum, set it to minl
                         if (left_motor < minl) left_motor = minl;
-                        right_motor = (int)(R_MAX * 255 - adjustment_rate);
                         if (right_motor < minr) right_motor = minr; 
                         break;
 
 
                  
                     case REVERSE_CIRCLE: //  reverese CIRCLE
-
+                        // 60% speed in reverse mode
                         L_MAX = 0.6;
                         R_MAX = 0.6;
                         // start reducing error if line was crossed to prevent the integral component to cause spinning
@@ -300,42 +304,41 @@ namespace BluetoothGUISample
                         {
                             total_error = (int)(0.6 * total_error);
                         }
-                        
-                        adjustment_rate = error * K_T + (error - prev_error) * D_T + total_error * I_T;
-                        minl = 200; // minimum motor value
+                        // compute adjustment rate - PID equation
+                        adjustment_rate = error * P + (error - prev_error) * D + total_error * I;
+                        minl = 200; // minimum motor value - actually used as maximum but because of reversed logic this works
                         minr = 200; // 
 
+                        // compute the left and right motor values and find the inverse of it (255 - value) to run in reverse
+                        left_motor = 255 - (int)(L_MAX * 255 - adjustment_rate);
+                        right_motor = 255 - (int)(R_MAX * 255 + adjustment_rate);
 
-                        left_motor = 255 - (int)(L_MAX * 255 + adjustment_rate);
-                        right_motor = 255 - (int)(R_MAX * 255 - adjustment_rate);
-
-                        // limit minimum values of left and right motor to prevent spinning in circles
+                        // limit minimum values of left and right motors
                         if (left_motor > minl) left_motor = minl;
                         if (right_motor > minr) right_motor = minr;
-                        
                         break;
 
                     case MANUAL: // manual control
+                        // set motor values to values of the byte boxes
                         left_motor = (byte)outByte1.Value;
                         right_motor = (byte)outByte2.Value;
                         break;
                     case STOP:
+                        // stop both motors
                         left_motor = 127;
                         right_motor = 127;
 
                         break;
-                    default:
-                        Console.WriteLine(String.Format("Error. Operation mode invalid: {0}\n", operation_mode));
-                        break;
                 }
 
                 // GUI Update
-                
                 adj_dir_label.Text = "Total Error: " + total_error.ToString();
                 adj_rate_label.Text = "Adj rate: " + adjustment_rate.ToString();
                 prev_adj_label.Text = "Error: " + error.ToString();
                 prev_adj_r_label.Text = "Prev error:" + previous_adjustment_rate.ToString();
                 label12.Text = "Bonus " + bonus.ToString();
+
+                // update previous error value
                 prev_error = error;
                 
                 
@@ -359,6 +362,7 @@ namespace BluetoothGUISample
             // update GUI display
             setBoxColors(left_sensor, right_sensor);
 
+            // send values 
             sendIO(2, (byte)left_motor);
             sendIO(3, (byte)right_motor);
             
@@ -371,63 +375,81 @@ namespace BluetoothGUISample
         // sensor turns GREEN when a line is detected
         private void setBoxColors(int left_sensor, int right_sensor)
         {
-            // 
-            
+            // rgb values
             int r, g, b;
-            b = 0;
-
+            b = 0; // blue is 0
+            // if left motor is in reverse colour box red
             if (left_motor <= 127)
             {
                 r = 2 * (127 - left_motor);
                 g = 0;
             }
-            else
+            else // if forward colour it green
             {
                 g = 2 * (left_motor - 127);
                 r = 0; 
             }
-
+            
+            // limit colour values to 0-255
             if (r > 255)
                 r = 255;
             if (r < 0)
                 r = 0;
-
+            // same for green
             if (g > 255)
                 g = 255;
             if (g < 0)
                 g = 0;
 
-            
+            // translate from int r and g to a readable value
             pictureBox2.BackColor = ColorTranslator.FromWin32(r + 256*g);
-            b = 0x00;
-
+            
+            // if right motor is in reverse colour it red
             if (right_motor <= 127)
             {
                 r = 2 * (127 - right_motor);
                 g = 0;
             }
             else
-            {
+            { // colour it green if positive
                 g = 2 * (right_motor - 127);
                 r = 0; 
             }
 
+            // limit bounds of byte 0 to 255
             if (r > 255)
                 r = 255;
             if (r < 0)
                 r = 0;
-
+            // same for green
             if (g > 255)
                 g = 255;
             if (g < 0)
                 g = 0;
-
+            // update colour of box
             pictureBox1.BackColor = ColorTranslator.FromWin32(r + 256*g + b);
 
-            // SENSOR COLOUR CHANGES
-
+            // SENSOR COLOUR CHANGES - set it white if on, 0 if off
             l_sensorBox.BackColor = (left_sensor == 0) ? Color.White : Color.Black;
             r_sensorBox.BackColor = (right_sensor == 0) ? Color.White : Color.Black;
+
+            if (Math.Abs(left_motor - right_motor) < 5) // if moving forward hide arrows
+            {
+                left_arrow.Visible = false;
+                right_arrow.Visible = false;
+            }
+            // if turning left - turn on left arrow
+            else if (left_motor > right_motor)
+            {
+                left_arrow.Visible = false; // show right arrow as vehicle is turning right
+                right_arrow.Visible = true;
+            } // if turning right - turn on right arrow
+            else if (left_motor < right_motor) // if forwards, hide them 
+            {
+                left_arrow.Visible = true; // show left arrow as vehicle turns left
+                right_arrow.Visible = false;
+            }
+            
 
         }
         
@@ -435,28 +457,35 @@ namespace BluetoothGUISample
         // Method controlling PWM1 scrollbar value
         private void OutputBox1_ValueChanged(object sender, EventArgs e)
         {
+            // read value from outputbox
             double d_in = (double)OutputBox1.Value;
 
+            // convert to byte from pwm value
             double a = K2 * d_in + K1; // equation obtained after performing a linear regression on bit v data for this DAC
 
+            // limit bounds
             if (a > 255) a = 255;
             if (a < 0) a = 0;
 
-            if (outByte1.Focused != true) // only update when that specific box isn't focused
-                outByte1.Value = (decimal)Math.Floor(a);
+            // only update when that specific box isn't focused - ensures it doesn't lock the value as it cyclically updates 
+            if (outByte1.Focused != true)
+                if (operation_mode == STOP) // and when stopped 
+                    outByte1.Value = (decimal)Math.Floor(a);
         }
         // Method controlling PWM2 scrollbar value
         private void OutputBox2_ValueChanged(object sender, EventArgs e)
         {
+            // read value from outputbox
             double d_in = (double)OutputBox2.Value;
 
             double a = K2 * d_in + K1; // equation obtained after performing a linear regression on bit v data for this DAC
-
+            
+            // ensure value isn't out of bounds
             if (a > 255)    a = 255;
             if (a < 0)      a = 0;
-
+            // only update box values when one of them isn't focused - ensures they don't cyclically update each other and lock the value
             if (outByte2.Focused != true)
-                    if (operation_mode == 5)
+                    if (operation_mode == STOP)
                         outByte2.Value = (decimal)Math.Floor(a);
         }
 
@@ -465,58 +494,70 @@ namespace BluetoothGUISample
         // Method controlling byte1 scrollbar value
         private void outByte1_ValueChanged(object sender, EventArgs e)
         {
+            // read value from byteBox
             double b_in = (double)outByte1.Value;
-
+            // convert to PWM
             double a = (b_in - K1) / K2; // the reciprocal of the equation obtained via linear regression
-
+            // limit range to 0-100
             if (a > 100) a = 100; // ensure value is not out of bounds
             if (a < 0) a = 0;       
 
+            // only update box values when one of them isn't focused - ensures they don't cyclically update each other and lock the value
             if (OutputBox1.Focused != true)
-                if (operation_mode == 5)
+                if (operation_mode == STOP)
                     OutputBox1.Value = (decimal)(a);
 
         }
         // Method controlling byte2 scrollbar value
         private void outByte2_ValueChanged(object sender, EventArgs e)
         {
+            // read value from byteBox
             double b_in = (double)outByte2.Value;
-
+            // convert to PWM
             double a = (b_in - K1) / K2; // the reciprocal of the equation obtained via linear regression
-
-            if (a > 100) a = 100; // ensure value is not out of bounds
+            // limit range to 0-100
+            if (a > 100) a = 100;
             if (a < 0) a = 0;
 
+            // only update box values when one of them isn't focused - ensures they don't cyclically update each other and lock the value
             if (OutputBox2.Focused != true)
                 if (operation_mode == 5)
                     OutputBox2.Value = (decimal)(a);
 
         }
+
         // handle input - dropdown box
         private void modeSelect_Box_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // read and store operating mode
             int index = modeSelect_Box.SelectedIndex; // get index of currently selected item
             operation_mode = index;
-            
-
+            // whenever operating mode is changed, stop the cart. - safety
+            is_running = false;
             switch (index)
             {
+                // If in the standard operating modes, update the GUI accordingly
                 case CLOCKWISE:
                 case COUNTERCLOCKWISE:
                 case REVERSE_CIRCLE:
                 case SQUIGGLE:
+                    
                     running_label.Text = "Ready";
+                    // disable manual speed override boxes
                     outByte1.Enabled = false;
                     outByte2.Enabled = false;
                     OutputBox1.Enabled = false;
                     OutputBox2.Enabled = false;
                     running_label.ForeColor = Color.Green;
                     break;
+
+                // if in manual operating mode - update GUI accordingly
                 case MANUAL:
-                    is_running = true;
                     running_label.Text = "Manual Ctrl";
+                    // if manual override is checked
                     if (checkBox1.Checked)
                     {
+                        // enable manual speed override boxes 
                         outByte1.Enabled = true;
                         outByte2.Enabled = true;
                         OutputBox1.Enabled = true;
@@ -526,20 +567,26 @@ namespace BluetoothGUISample
                     
                     break;
                 default: // 
-                    is_running = false;
+                    // when stopped update the GUI accordingly
                     running_label.Text = "Stopped";
                     running_label.ForeColor = Color.Red;
+                    left_arrow.Visible = false;
+                    right_arrow.Visible = false;
                     break;
             }
         }
 
+        // Method that handles any changes in the Manual Override Checkbox
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
+            // if it's checked - Manual override is on
             if (checkBox1.Checked)
             {
+                // enable checkboxes to force sensor values
                 force_left_sensor.Enabled = true;
                 force_right_sensor.Enabled = true;
-                if (operation_mode == 4)
+                // if in manual mode also enable manual motor control 
+                if (operation_mode == MANUAL) 
                 {
                     outByte1.Enabled = true;
                     outByte2.Enabled = true;
@@ -548,7 +595,7 @@ namespace BluetoothGUISample
                 }
                 
             }
-            else
+            else // if manual override is unchecked disable all manual override boxes
             {
                 force_left_sensor.Enabled = false;
                 force_right_sensor.Enabled = false;
@@ -560,69 +607,74 @@ namespace BluetoothGUISample
             }
         }
 
+        // if the Proportional scrollBox value changes update the Proportional parameter
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            K_T = (double)numericUpDown1.Value;
+            P = (double)numericUpDown1.Value;
         }
 
-        private long millis()
-        {
-            return stopwatch.ElapsedMilliseconds;
-        }
-
+        // if the Integral scrollBox value changes update the Integral parameter
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
         {
-            I_T = (double)numericUpDown2.Value;
+            I = (double)numericUpDown2.Value;
         }
 
+        // if the Derivative scrollBox value changes update the Derivative parameter
+        private void numericUpDown3_ValueChanged(object sender, EventArgs e)
+        {
+            D = (double)numericUpDown3.Value;
+        }
+
+        // handles the Reset Button click
         private void button1_Click(object sender, EventArgs e)
         {
+            // stop motors
             left_motor = 127;
             right_motor = 127;
 
+            // reset error
             error = 0;
             total_error = 0;
             prev_error = 0;
 
-            // reset
+            // reset direction change flag
             bonus = 0;
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        // Error decay scrollbox
+        private void numericUpDown4_ValueChanged(object sender, EventArgs e)
         {
-            is_running = false;
-            operation_mode = 5 ; // stopped
-            modeSelect_Box.SelectedIndex = 5; // set to stopped
+            // set error decay to scrollbox value
+            ERROR_DECAY = (double)numericUpDown4.Value;
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            left_motor = 0;
-            right_motor = 10;
-            outByte1.Value = left_motor;
-            outByte2.Value = right_motor;
-        }
+
 
         /////////////////////////////////
         // stop when space is pressed
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            // if space is pressed 
             if (keyData == Keys.Space)
             {
+                // if vehicle is running stop it
                 if (is_running == true)
                 {
+                    // update GUI and flags
                     running_label.Text = "Stopped";
                     running_label.ForeColor = Color.Red;
                     is_running = false;
                     
                 }
-                else
+                else // if vehicle was stopped - start it
                 {
+                    // update GUI
                     running_label.Text = "Started";
                     running_label.ForeColor = Color.Green;
+                    // set the running flag
                     is_running = true;
                 }
-                return true;    // indicate that you handled this keystroke
+                return true;    // indicate that the keystroke was handled
             }
 
             // Call the base class
