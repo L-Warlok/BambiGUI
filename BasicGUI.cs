@@ -96,6 +96,10 @@ namespace BluetoothGUISample
             stopwatch.Start();
             start_time = stopwatch.ElapsedMilliseconds;
 
+            // initialise sensor boxes
+            l_sensorBox.BackColor = Color.Black;
+            r_sensorBox.BackColor = Color.Black;
+
             numericUpDown1.Value = (decimal)K_T;
             numericUpDown2.Value = (decimal)I_T;
             numericUpDown3.Value = (decimal)D_T;
@@ -181,12 +185,9 @@ namespace BluetoothGUISample
                                 case 0: //Save the data to a variable and place in the textbox.
                                     
                                     Input1 = Inputs[2];
-                                    
                                     break;
                                 case 1: //Save the data to a variable and place in the textbox. 
-                                    
                                     Input2 = Inputs[2];
-                                    
                                     break;
                             }
                         }
@@ -203,19 +204,13 @@ namespace BluetoothGUISample
         private double adjustment_rate = 0; // stores the last adjustment 
         private double previous_adjustment_rate = 0; // stores the last adjustment rate
 
-        private long last_adj_ms = 0;
+
 
         // error
         private int error = 1; // MAX error is 2
         private int prev_error = 0; 
         private int total_error = 0;
         private int bonus = 0;
-
-        private int adjustment_direction = LEFT; // adjustment direction
-        private int tick = 0; // instead of a timer, for controller mode 2: a TICK is used.
-        private int ticks_on_line = 0;
-        private int ticks_adjusting = 0; // used to keep track of how long it's been turning for
-        
 
         // main loop 
         private void sendLoopTimer_Tick(object sender, EventArgs e)
@@ -227,8 +222,10 @@ namespace BluetoothGUISample
             int right_sensor = ((1 << SENSOR2_POS) & Input2) >> SENSOR2_POS;
 
             if (!checkBox1.Checked)
+            {
                 sensor_readings_label.Text = String.Format("L: {0} R: {1}", left_sensor, right_sensor);
-            
+            }
+
 
             // this logic determines whether the vehicle must adjust to the left or right after coming outside of the line
             
@@ -253,7 +250,7 @@ namespace BluetoothGUISample
                     if (r) right_sensor = 1;
                     else right_sensor = 0;
                 }
-                else if (operation_mode != STOP) // not in stop mode
+                if (operation_mode != STOP) // not in stop mode
                 {
                     error = (right_sensor - left_sensor) ;
                     total_error += error + bonus;
@@ -345,20 +342,22 @@ namespace BluetoothGUISample
             }
             else
             {
+                // stop motors if is_running flag is cleared
                 left_motor = 127;
                 right_motor = 127;
             }
-
             
-
+            // limit the range of the left and right motors to 1 byte
             if (left_motor > 255) left_motor = 255;
             if (right_motor > 255) right_motor = 255;
             if (left_motor < 0) left_motor = 0;
             if (right_motor < 0) right_motor = 0; 
 
+            // prepare the byte value for output
             outByte1.Value = left_motor;
             outByte2.Value = right_motor;
-            setBoxColors();
+            // update GUI display
+            setBoxColors(left_sensor, right_sensor);
 
             sendIO(2, (byte)left_motor);
             sendIO(3, (byte)right_motor);
@@ -367,7 +366,10 @@ namespace BluetoothGUISample
 
 
         // method that changes GUI wheel colours
-        private void setBoxColors()
+        // moving forward turns wheels green
+        // reversing turns them red
+        // sensor turns GREEN when a line is detected
+        private void setBoxColors(int left_sensor, int right_sensor)
         {
             // 
             
@@ -382,7 +384,7 @@ namespace BluetoothGUISample
             else
             {
                 g = 2 * (left_motor - 127);
-                r = 0; // because of how maths works.
+                r = 0; 
             }
 
             if (r > 255)
@@ -419,8 +421,13 @@ namespace BluetoothGUISample
                 g = 255;
             if (g < 0)
                 g = 0;
+
             pictureBox1.BackColor = ColorTranslator.FromWin32(r + 256*g + b);
 
+            // SENSOR COLOUR CHANGES
+
+            l_sensorBox.BackColor = (left_sensor == 0) ? Color.White : Color.Black;
+            r_sensorBox.BackColor = (right_sensor == 0) ? Color.White : Color.Black;
 
         }
         
@@ -490,7 +497,7 @@ namespace BluetoothGUISample
         {
             int index = modeSelect_Box.SelectedIndex; // get index of currently selected item
             operation_mode = index;
-            tick = 0;
+            
 
             switch (index)
             {
@@ -579,8 +586,6 @@ namespace BluetoothGUISample
 
             // reset
             bonus = 0;
-            ticks_on_line = 0;
-            tick = 0;
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)

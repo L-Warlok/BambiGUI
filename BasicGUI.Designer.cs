@@ -70,6 +70,8 @@
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
+            this.l_sensorBox = new System.Windows.Forms.PictureBox();
+            this.r_sensorBox = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.outByte1)).BeginInit();
@@ -81,6 +83,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.l_sensorBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.r_sensorBox)).BeginInit();
             this.SuspendLayout();
             // 
             // serial
@@ -500,11 +504,29 @@
             this.label12.TabIndex = 39;
             this.label12.Text = "Bonus:";
             // 
+            // l_sensorBox
+            // 
+            this.l_sensorBox.Location = new System.Drawing.Point(449, 364);
+            this.l_sensorBox.Name = "l_sensorBox";
+            this.l_sensorBox.Size = new System.Drawing.Size(22, 26);
+            this.l_sensorBox.TabIndex = 40;
+            this.l_sensorBox.TabStop = false;
+            // 
+            // r_sensorBox
+            // 
+            this.r_sensorBox.Location = new System.Drawing.Point(477, 364);
+            this.r_sensorBox.Name = "r_sensorBox";
+            this.r_sensorBox.Size = new System.Drawing.Size(22, 26);
+            this.r_sensorBox.TabIndex = 41;
+            this.r_sensorBox.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(560, 513);
+            this.Controls.Add(this.r_sensorBox);
+            this.Controls.Add(this.l_sensorBox);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.pictureBox2);
@@ -559,6 +581,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.l_sensorBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.r_sensorBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -606,6 +630,8 @@
         private System.Windows.Forms.PictureBox pictureBox3;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.PictureBox l_sensorBox;
+        private System.Windows.Forms.PictureBox r_sensorBox;
     }
 }
 
